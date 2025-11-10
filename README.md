@@ -1,5 +1,10 @@
 # Next.js Introspect
 
+[![npm version](https://badge.fury.io/js/next-introspect.svg)](https://badge.fury.io/js/next-introspect)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Node.js Version](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen)](https://nodejs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+
 A comprehensive Next.js project introspection tool that analyzes routing structures, detects framework configurations, and provides detailed metadata about your Next.js application.
 
 ## 🚀 Quick Start
@@ -1422,6 +1427,39 @@ bun run test
 ## 📄 License
 
 MIT License - see LICENSE file for details.
+
+## 🤝 Contributing
+
+This package is developed by [Webdesign29](https://webdesign29.net/) for the community. We welcome contributions from everyone!
+
+### How to Contribute
+
+1. **Fork the repository** on GitHub
+2. **Create a feature branch**: `git checkout -b feature/your-feature-name`
+3. **Make your changes** and ensure tests pass
+4. **Submit a pull request** with a clear description
+
+### Development
+
+```bash
+# Install dependencies
+bun install
+
+# Run tests
+bun run test
+
+# Build the project
+bun run build
+
+# Development mode
+bun run dev
+```
+
+### Issues & Feature Requests
+
+- **Bug reports**: Please use the GitHub issue tracker
+- **Feature requests**: Open an issue with the "enhancement" label
+- **Questions**: Check the documentation or ask in discussions
 
 ## 🙏 Acknowledgments
 

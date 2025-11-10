@@ -368,10 +368,7 @@ declare class NextIntrospect {
     /**
      * Format the results using the specified formatter
      */
-    format(format: OutputFormat, metadata?: Record<string, {
-        title?: string;
-        description?: string;
-    }>): string | object;
+    format(format: OutputFormat): string | object;
     /**
      * Set the analysis mode
      */
@@ -423,12 +420,7 @@ declare class NextIntrospect {
     /**
      * Export results to a file
      */
-    exportToFile(filePath: string, format?: OutputFormat, options?: {
-        metadata?: Record<string, {
-            title?: string;
-            description?: string;
-        }>;
-    }): Promise<void>;
+    exportToFile(filePath: string, format?: OutputFormat): Promise<void>;
     /**
      * Merge an existing introspection JSON file with new metadata
      */

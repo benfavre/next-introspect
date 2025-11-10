@@ -4,7 +4,7 @@ import {
   NextIntrospect,
   NextJsAdapter,
   ObjectFormatter
-} from "./chunk-7MC7YOXI.js";
+} from "./chunk-T7V4IHSO.js";
 import {
   detectComponentType,
   detectRouterType,
@@ -490,11 +490,16 @@ var ConfigParser = class {
     const config = {};
     config.basePath = this.extractStringProperty(content, "basePath");
     config.distDir = this.extractStringProperty(content, "distDir");
-    config.trailingSlash = this.extractBooleanProperty(content, "trailingSlash");
+    config.trailingSlash = this.extractBooleanProperty(
+      content,
+      "trailingSlash"
+    );
     config.images = this.extractImagesConfig(content);
     config.env = this.extractEnvConfig(content);
     config.experimental = this.extractExperimentalConfig(content);
-    config.hasMiddleware = await this.checkMiddlewareExists(path2.dirname(configPath));
+    config.hasMiddleware = await this.checkMiddlewareExists(
+      path2.dirname(configPath)
+    );
     return config;
   }
   /**
@@ -547,7 +552,10 @@ var ConfigParser = class {
    * Extract experimental features configuration
    */
   static extractExperimentalConfig(content) {
-    const experimentalSection = this.extractObjectProperty(content, "experimental");
+    const experimentalSection = this.extractObjectProperty(
+      content,
+      "experimental"
+    );
     if (!experimentalSection) {
       return void 0;
     }
@@ -570,7 +578,10 @@ var ConfigParser = class {
    * Extract an object property from config content
    */
   static extractObjectProperty(content, property) {
-    const regex = new RegExp(`${property}\\s*:\\s*({[^{}]*(?:{[^{}]*}[^{}]*)*})`, "g");
+    const regex = new RegExp(
+      `${property}\\s*:\\s*({[^{}]*(?:{[^{}]*}[^{}]*)*})`,
+      "g"
+    );
     const match = regex.exec(content);
     return match ? match[1] : void 0;
   }

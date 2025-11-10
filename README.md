@@ -2,6 +2,28 @@
 
 A comprehensive Next.js project introspection tool that analyzes routing structures, detects framework configurations, and provides detailed metadata about your Next.js application.
 
+## 🚀 Quick Start
+
+**Install globally for CLI usage:**
+```bash
+npm install -g next-introspect
+# or
+bun add -g next-introspect
+```
+
+**Analyze your Next.js project:**
+```bash
+next-introspect . --format typescript --output routes.ts
+```
+
+**Use in your code:**
+```typescript
+import { routes } from './routes';
+
+const postUrl = routes.blog.posts.byId({ id: "123" });
+// → "/blog/posts/123"
+```
+
 ## ✨ Features
 
 - **Framework Detection**: Automatically detects Next.js projects and router types (App Router, Pages Router, or both)

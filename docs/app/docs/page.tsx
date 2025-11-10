@@ -1,24 +1,11 @@
-import { source } from '@/app/source';
-import defaultMdxComponents from 'fumadocs-ui/mdx';
-import {
-  DocsPage,
-  DocsBody,
-} from 'fumadocs-ui/page';
-import { notFound } from 'next/navigation';
-
-export default async function Page() {
-  const page = source.getPage([]);
-  if (!page) notFound();
-
-  const MDX = page.data.body;
-
+export default function Page() {
   return (
-    <DocsPage toc={page.data.toc} full={page.data.full}>
-      <h1 className="text-3xl font-bold">{page.data.title}</h1>
-      <p className="text-muted-foreground">{page.data.description}</p>
-      <DocsBody>
-        <MDX components={defaultMdxComponents} />
-      </DocsBody>
-    </DocsPage>
+    <div className="max-w-4xl mx-auto py-12">
+      <h1 className="text-4xl font-bold mb-4">Documentation</h1>
+      <p className="text-lg text-gray-600">
+        Welcome to Next Introspect documentation. This page is under
+        construction.
+      </p>
+    </div>
   );
 }

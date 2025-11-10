@@ -1,42 +1,49 @@
-import { source } from '@/app/source';
-import defaultMdxComponents from 'fumadocs-ui/mdx';
-import {
-  DocsPage,
-  DocsBody,
-} from 'fumadocs-ui/page';
-import { notFound } from 'next/navigation';
+import { notFound } from "next/navigation";
 
 export default async function Page({
   params,
 }: {
-  params: { slug: string[] };
+  params: Promise<{ slug: string[] }>;
 }) {
-  const page = source.getPage(params.slug);
-  if (!page) notFound();
+  const { slug } = await params;
 
-  const MDX = page.data.body;
+  // Placeholder page - docs functionality to be implemented
+  const title = slug.join(" / ");
 
   return (
-    <DocsPage toc={page.data.toc} full={page.data.full}>
-      <h1 className="text-3xl font-bold">{page.data.title}</h1>
-      <p className="text-muted-foreground">{page.data.description}</p>
-      <DocsBody>
-        <MDX components={defaultMdxComponents} />
-      </DocsBody>
-    </DocsPage>
+    <div className="max-w-4xl mx-auto px-4 py-12">
+      <h1 className="text-4xl font-bold mb-4">Documentation</h1>
+      <p className="text-lg text-gray-600">Page: {title}</p>
+      <p className="mt-4 text-gray-500">
+        Documentation content would be displayed here.
+      </p>
+    </div>
   );
 }
 
 export async function generateStaticParams() {
-  return source.generateParams();
+  // Return basic documentation pages
+  return [
+    { slug: ["getting-started"] },
+    { slug: ["api"] },
+    { slug: ["cli"] },
+    { slug: ["usage", "watch-mode"] },
+    { slug: ["features", "analysis-modes"] },
+    { slug: ["features", "output-formats"] },
+    { slug: ["features", "typescript-output"] },
+  ];
 }
 
-export async function generateMetadata({ params }: { params: { slug: string[] } }) {
-  const page = source.getPage(params.slug);
-  if (!page) notFound();
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string[] }>;
+}) {
+  const { slug } = await params;
+  const title = slug.join(" > ");
 
   return {
-    title: page.data.title,
-    description: page.data.description,
+    title: `${title} | Next Introspect Docs`,
+    description: `Documentation for Next Introspect: ${title}`,
   };
 }

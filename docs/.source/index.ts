@@ -1,7 +1,11 @@
-import { docs } from '@/.source';
-import { loader } from 'fumadocs-core/source';
+import { docs } from "@/source.config";
 
-export const source = loader({
-  baseUrl: '/docs',
-  source: docs.toFumadocsSource(),
-});
+export { docs };
+
+// Static page tree placeholder
+export const pageTree = {
+  name: "Docs",
+  children: [{ type: "page", name: "Getting Started", href: "/docs" }],
+} as any;
+
+export const meta: any[] = [];

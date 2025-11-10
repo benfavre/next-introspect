@@ -13,7 +13,7 @@ bun add -g next-introspect
 
 **Analyze your Next.js project:**
 ```bash
-next-introspect . --format typescript --output routes.ts
+next-introspect introspect . --format typescript --output routes.ts
 ```
 
 **Use in your code:**
@@ -62,65 +62,65 @@ npm install next-introspect
 
 ```bash
 # Analyze current directory
-next-introspect .
+next-introspect introspect .
 
 # Analyze specific project
-next-introspect /path/to/nextjs/project
+next-introspect introspect /path/to/nextjs/project
 ```
 
 #### Output Formats
 
 ```bash
 # Export as JSON
-next-introspect . --format json --output routes.json
+next-introspect introspect . --format json --output routes.json
 
 # Generate Markdown documentation
-next-introspect . --format markdown --output ROUTES.md
+next-introspect introspect . --format markdown --output ROUTES.md
 
 # Generate TypeScript types for type-safe route access
-next-introspect . --format typescript --output routes.ts
+next-introspect introspect . --format typescript --output routes.ts
 
 # Pretty-printed JSON with custom indentation
-next-introspect . --format json --indent 4
+next-introspect introspect . --format json --indent 4
 ```
 
 #### Analysis Modes
 
 ```bash
 # Basic analysis (fastest)
-next-introspect . --mode basic
+next-introspect introspect . --mode basic
 
 # Detailed analysis (includes component types)
-next-introspect . --mode detailed
+next-introspect introspect . --mode detailed
 
 # Comprehensive analysis (includes all metadata and exports)
-next-introspect . --mode comprehensive
+next-introspect introspect . --mode comprehensive
 ```
 
 #### Path Display Options
 
 ```bash
 # Show paths relative to project root
-next-introspect . --path-style relative-to-project --show-file-paths
+next-introspect introspect . --path-style relative-to-project --show-file-paths
 
 # Show paths relative to app directory
-next-introspect . --path-style relative-to-app --show-file-paths
+next-introspect introspect . --path-style relative-to-app --show-file-paths
 
 # Strip custom prefix from paths
-next-introspect . --path-style strip-prefix --strip-prefix "src/app" --show-file-paths
+next-introspect introspect . --path-style strip-prefix --strip-prefix "src/app" --show-file-paths
 
 # Combine with other options
-next-introspect . --format json --path-style relative-to-project --show-file-paths --output routes.json
+next-introspect introspect . --format json --path-style relative-to-project --show-file-paths --output routes.json
 ```
 
 #### Advanced Options
 
 ```bash
 # Quiet mode (suppress progress messages)
-next-introspect . --quiet --output result.json
+next-introspect introspect . --quiet --output result.json
 
 # Full command with all options
-next-introspect /path/to/project \
+next-introspect introspect /path/to/project \
   --format markdown \
   --mode comprehensive \
   --output project-routes.md
@@ -132,16 +132,16 @@ Watch mode continuously monitors your Next.js project for file changes and autom
 
 ```bash
 # Start watch mode with default settings
-next-introspect . --watch
+next-introspect introspect . --watch
 
 # Watch mode with custom format and output
-next-introspect . --watch --format typescript --output routes.ts
+next-introspect introspect . --watch --format typescript --output routes.ts
 
 # Watch mode with quiet output (only show changes)
-next-introspect . --watch --quiet --output routes.json
+next-introspect introspect . --watch --quiet --output routes.json
 
 # Combine with other options
-next-introspect . --watch --mode comprehensive --format markdown --output ROUTES.md
+next-introspect introspect . --watch --mode comprehensive --format markdown --output ROUTES.md
 ```
 
 ### Features
@@ -172,13 +172,13 @@ The following directories are automatically ignored:
 
 ```bash
 # Development workflow: Watch for changes during development
-next-introspect . --watch --format typescript --output src/routes.ts
+next-introspect introspect . --watch --format typescript --output src/routes.ts
 
 # Documentation: Auto-update route documentation
-next-introspect . --watch --format markdown --output docs/ROUTES.md
+next-introspect introspect . --watch --format markdown --output docs/ROUTES.md
 
 # CI/CD: Monitor route changes in deployment pipeline
-next-introspect . --watch --quiet --output routes.json
+next-introspect introspect . --watch --quiet --output routes.json
 ```
 
 ### Programmatic API
@@ -292,29 +292,29 @@ const introspect = new NextIntrospect('./my-app', {
 
 ```bash
 # Default: absolute paths
-next-introspect .
+next-introspect introspect .
 # filePath: "/full/path/to/project/src/app/page.tsx"
 
 # Relative to project root
-next-introspect . --path-style relative-to-project --show-file-paths
+next-introspect introspect . --path-style relative-to-project --show-file-paths
 # filePath: "src/app/page.tsx"
 
 # Relative to app directory
-next-introspect . --path-style relative-to-app --show-file-paths
+next-introspect introspect . --path-style relative-to-app --show-file-paths
 # filePath: "page.tsx"
 
 # Strip custom prefix
-next-introspect . --path-style strip-prefix --strip-prefix "src/" --show-file-paths
+next-introspect introspect . --path-style strip-prefix --strip-prefix "src/" --show-file-paths
 # filePath: "app/page.tsx"
 
 # Package.json summary (much more concise)
-next-introspect . --package-summary
+next-introspect introspect . --package-summary
 
 # Include scripts in summary
-next-introspect . --package-summary --include-scripts
+next-introspect introspect . --package-summary --include-scripts
 
 # Include dependencies in summary
-next-introspect . --package-summary --include-deps
+next-introspect introspect . --package-summary --include-deps
 ```
 
 ## 📝 Route Metadata
@@ -471,10 +471,25 @@ The `--format typescript` option generates **tree-shakable** TypeScript code tha
 
 ```typescript
 // Ultra-granular named exports for maximum tree-shaking
-export const blog = { index: { path: "/blog" }, posts: { byId: { path: "/blog/posts/[id]", get: ... }, bySlugRest: { path: "/blog/posts/[...slug]", get: ... } } };
-export const blog_posts = { byId: { path: "/blog/posts/[id]", get: ... }, bySlugRest: { path: "/blog/posts/[...slug]", get: ... } };
-export const blog_posts_byId = { path: "/blog/posts/[id]", get: ({ id }: { id: string }) => `/blog/posts/${id}` };
-export const blog_posts_bySlugRest = { path: "/blog/posts/[...slug]", get: ({ slug }: { slug: string }) => `/blog/posts/${slug}` };
+export const blog = {
+  index: { path: "/blog" },
+  posts: {
+    byId: { path: "/blog/posts/[id]", get: ({ id }: { id: string }) => `/blog/posts/${id}` },
+    bySlugRest: { path: "/blog/posts/[...slug]", get: ({ slug }: { slug: string[] }) => `/blog/posts/${slug.join('/')}` }
+  }
+};
+export const blog_posts = {
+  byId: { path: "/blog/posts/[id]", get: ({ id }: { id: string }) => `/blog/posts/${id}` },
+  bySlugRest: { path: "/blog/posts/[...slug]", get: ({ slug }: { slug: string[] }) => `/blog/posts/${slug.join('/')}` }
+};
+export const blog_posts_byId = {
+  path: "/blog/posts/[id]",
+  get: ({ id }: { id: string }) => `/blog/posts/${id}`
+};
+export const blog_posts_bySlugRest = {
+  path: "/blog/posts/[...slug]",
+  get: ({ slug }: { slug: string[] }) => `/blog/posts/${slug.join('/')}`
+};
 export const settings = { socialAccounts: { path: "/settings/social-accounts" } };
 export const settings_socialAccounts = { path: "/settings/social-accounts" };
 
@@ -502,27 +517,32 @@ export const routes = {
 
 // Default export for convenience
 export default routes;
-  fournisseur: {
-    byVendorId: {
-      path: "/fournisseur/[vendorId]",  // Dynamic segment [vendorId]
-      get: ({ vendorId }: { vendorId: string }) => `/fournisseur/${vendorId}`
-    },
-    login: {
-      path: "/fournisseur/login"
-    },
-    session: {
-      path: "/fournisseur/session"
-    }
+```
+
+// Additional named exports for individual routes
+export const fournisseur = {
+  byVendorId: {
+    path: "/fournisseur/[vendorId]",  // Dynamic segment [vendorId]
+    get: ({ vendorId }: { vendorId: string }) => `/fournisseur/${vendorId}`
   },
-  sites: {
-    avivre_com: {
-      path: "/sites/avivre.com"  // /sites/avivre.com → dots become underscores
-    },
-    gestionEnt_fr: {
-      path: "/sites/gestion-ent.fr"  // /sites/gestion-ent.fr → camelCase + underscores
-    }
+  login: {
+    path: "/fournisseur/login"
+  },
+  session: {
+    path: "/fournisseur/session"
   }
-} as const;
+};
+
+export const fournisseur_byVendorId = fournisseur.byVendorId;
+
+export const sites = {
+  avivre_com: {
+    path: "/sites/avivre.com"  // /sites/avivre.com → dots become underscores
+  },
+  gestionEnt_fr: {
+    path: "/sites/gestion-ent.fr"  // /sites/gestion-ent.fr → camelCase + underscores
+  }
+};
 
 export type Routes = typeof routes;
 ```
@@ -595,13 +615,13 @@ function navigateTo(route: string) {
 
 ```bash
 # Generate TypeScript route definitions
-next-introspect . --format typescript --output routes.ts
+next-introspect introspect . --format typescript --output routes.ts
 
 # Generate with custom namespace
-next-introspect . --format typescript --namespace "AppRoutes" --output app-routes.ts
+next-introspect introspect . --format typescript --namespace "AppRoutes" --output app-routes.ts
 
 # Combine with other options
-next-introspect . --format typescript --mode comprehensive --output routes.ts
+next-introspect introspect . --format typescript --mode comprehensive --output routes.ts
 ```
 
 ### Programmatic Generation
@@ -862,14 +882,433 @@ The package is built with a modular architecture:
 
 ### Extensibility
 
-The adapter pattern allows adding support for other frameworks:
+The adapter pattern allows adding support for other frameworks. Custom adapters can be created to support any web framework with routing capabilities.
+
+## 🛠️ Creating Custom Adapters
+
+You can extend next-introspect to support other frameworks by creating custom adapters. This section provides a comprehensive guide to building your own framework adapter.
+
+### Adapter Interface
+
+All adapters must implement the `FrameworkAdapter` interface:
 
 ```typescript
-class RemixAdapter extends BaseAdapter {
-  name = 'remix';
-  // Implement framework-specific analysis
+interface FrameworkAdapter {
+  /** Framework name (e.g., 'remix', 'nuxt', 'sveltekit') */
+  name: string;
+
+  /** Detect if this framework is present in the project */
+  detect(projectPath: string): Promise<boolean>;
+
+  /** Get project information specific to this framework */
+  getProjectInfo(projectPath: string): Promise<ProjectInfo>;
+
+  /** Get routes for this framework */
+  getRoutes(projectPath: string, mode: OutputMode): Promise<RouteInfo[]>;
 }
 ```
+
+### Step-by-Step Guide
+
+#### 1. Create Your Adapter Class
+
+Extend `BaseAdapter` for common functionality:
+
+```typescript
+import { BaseAdapter } from 'next-introspect';
+import type { ProjectInfo, RouteInfo, OutputMode } from 'next-introspect';
+
+export class MyFrameworkAdapter extends BaseAdapter {
+  constructor() {
+    super('myframework'); // Framework name
+  }
+
+  // Implement required methods...
+}
+```
+
+#### 2. Implement Detection Logic
+
+The `detect()` method should check for framework-specific files or dependencies:
+
+```typescript
+async detect(projectPath: string): Promise<boolean> {
+  // Check for package.json dependency
+  const version = await this.getFrameworkVersion(projectPath, 'my-framework');
+  if (version) return true;
+
+  // Check for framework-specific files
+  const hasConfig = await this.fileExists(path.join(projectPath, 'my.config.js'));
+  const hasRoutes = await this.directoryExists(path.join(projectPath, 'routes'));
+
+  return hasConfig || hasRoutes;
+}
+```
+
+#### 3. Implement Project Info
+
+The `getProjectInfo()` method should gather framework-specific information:
+
+```typescript
+async getProjectInfo(projectPath: string): Promise<ProjectInfo> {
+  // Validate project path
+  await this.validateProjectPath(projectPath);
+
+  // Get framework version
+  const version = await this.getFrameworkVersion(projectPath, 'my-framework');
+
+  // Detect configuration
+  const config = await this.parseFrameworkConfig(projectPath);
+
+  // Determine source directories
+  const sourceDirs: Record<string, string> = {};
+  if (await this.directoryExists(path.join(projectPath, 'routes'))) {
+    sourceDirs.routes = 'routes';
+  }
+  if (await this.directoryExists(path.join(projectPath, 'src', 'routes'))) {
+    sourceDirs.routes = 'src/routes';
+  }
+
+  return {
+    framework: 'myframework',
+    version: version || 'unknown',
+    rootDir: await this.normalizePath(projectPath),
+    config,
+    sourceDirs,
+  };
+}
+```
+
+#### 4. Implement Route Analysis
+
+The `getRoutes()` method should analyze the framework's routing structure:
+
+```typescript
+async getRoutes(projectPath: string, mode: OutputMode): Promise<RouteInfo[]> {
+  const routes: RouteInfo[] = [];
+
+  // Get parser configuration
+  const config = this.createParserConfig(projectPath, mode, {
+    include: ['routes/**/*', 'src/routes/**/*'],
+    exclude: ['**/*.test.*', '**/*.spec.*']
+  });
+
+  // Analyze routes directory
+  const routesDir = await this.findRoutesDirectory(projectPath);
+  if (routesDir) {
+    const directoryRoutes = await this.parseRoutesDirectory(routesDir, config);
+    routes.push(...directoryRoutes);
+  }
+
+  return routes;
+}
+```
+
+### Helper Methods
+
+#### Configuration Parsing
+
+```typescript
+private async parseFrameworkConfig(projectPath: string): Promise<any> {
+  const fs = await import('fs/promises');
+  const path = await import('path');
+
+  try {
+    const configPath = path.join(projectPath, 'my.config.js');
+    const configContent = await fs.readFile(configPath, 'utf-8');
+
+    // Parse configuration (implement your parsing logic)
+    return this.parseConfigFile(configContent);
+  } catch (_error) {
+    return {}; // Return default config
+  }
+}
+```
+
+#### Route Directory Discovery
+
+```typescript
+private async findRoutesDirectory(projectPath: string): Promise<string | null> {
+  const candidateDirs = [
+    path.join(projectPath, 'routes'),
+    path.join(projectPath, 'src', 'routes'),
+    path.join(projectPath, 'app', 'routes')
+  ];
+
+  for (const dir of candidateDirs) {
+    if (await this.directoryExists(dir)) {
+      return dir;
+    }
+  }
+
+  return null;
+}
+```
+
+#### Route Parsing
+
+```typescript
+private async parseRoutesDirectory(
+  routesDir: string,
+  config: ParserConfig
+): Promise<RouteInfo[]> {
+  const routes: RouteInfo[] = [];
+
+  // Use the traverseDirectory utility
+  const fs = await import('fs/promises');
+  const path = await import('path');
+
+  const entries = await fs.readdir(routesDir, { withFileTypes: true });
+
+  for (const entry of entries) {
+    if (entry.isDirectory()) {
+      // Handle nested routes
+      const nestedRoutes = await this.parseNestedRoutes(
+        path.join(routesDir, entry.name),
+        config
+      );
+      routes.push(...nestedRoutes);
+    } else if (entry.isFile() && this.isRouteFile(entry.name)) {
+      // Handle route files
+      const route = await this.parseRouteFile(
+        path.join(routesDir, entry.name),
+        config
+      );
+      if (route) routes.push(route);
+    }
+  }
+
+  return routes;
+}
+```
+
+### Utility Methods
+
+```typescript
+private isRouteFile(filename: string): boolean {
+  // Define which files are considered routes
+  return filename.endsWith('.tsx') ||
+         filename.endsWith('.jsx') ||
+         filename.endsWith('.ts') ||
+         filename.endsWith('.js');
+}
+
+private parseRouteFile(filePath: string, config: ParserConfig): Promise<RouteInfo | null> {
+  // Implement route file parsing logic
+  const relativePath = await this.getRelativePath(config.rootDir, filePath);
+  const routePath = this.convertFilePathToRoute(relativePath);
+
+  return {
+    path: routePath,
+    filePath: relativePath,
+    router: 'myframework',
+    pattern: 'static', // or 'dynamic' based on analysis
+  };
+}
+
+private convertFilePathToRoute(filePath: string): string {
+  // Convert file path to route path
+  // e.g., 'routes/users/[id].tsx' → '/users/[id]'
+  return filePath
+    .replace(/^routes\//, '/')
+    .replace(/^src\/routes\//, '/')
+    .replace(/\.tsx?$/, '')
+    .replace(/\.jsx?$/, '')
+    .replace(/\/index$/, '/'); // index files become directory routes
+}
+```
+
+### Complete Example: Remix Adapter
+
+```typescript
+import { BaseAdapter } from 'next-introspect';
+import type { ProjectInfo, RouteInfo, OutputMode } from 'next-introspect';
+
+export class RemixAdapter extends BaseAdapter {
+  constructor() {
+    super('remix');
+  }
+
+  async detect(projectPath: string): Promise<boolean> {
+    const hasRemix = await this.getFrameworkVersion(projectPath, 'remix');
+    const hasRoutes = await this.directoryExists(path.join(projectPath, 'app', 'routes'));
+    return Boolean(hasRemix || hasRoutes);
+  }
+
+  async getProjectInfo(projectPath: string): Promise<ProjectInfo> {
+    await this.validateProjectPath(projectPath);
+
+    const version = await this.getFrameworkVersion(projectPath, 'remix');
+    const baseInfo = await this.getBaseProjectInfo(projectPath, 'remix', version);
+
+    return {
+      ...baseInfo,
+      framework: 'remix',
+      version: version || 'unknown',
+      rootDir: await this.normalizePath(projectPath),
+      sourceDirs: {
+        routes: 'app/routes'
+      }
+    };
+  }
+
+  async getRoutes(projectPath: string, mode: OutputMode): Promise<RouteInfo[]> {
+    const routesDir = path.join(projectPath, 'app', 'routes');
+    const routes: RouteInfo[] = [];
+
+    if (!await this.directoryExists(routesDir)) {
+      return routes;
+    }
+
+    const config = this.createParserConfig(projectPath, mode, {
+      include: ['app/routes/**/*'],
+      exclude: ['**/*.test.*', '**/*.spec.*']
+    });
+
+    // Parse routes recursively
+    const parsedRoutes = await this.parseRemixRoutes(routesDir, config);
+    routes.push(...parsedRoutes);
+
+    return routes;
+  }
+
+  private async parseRemixRoutes(
+    routesDir: string,
+    config: ParserConfig
+  ): Promise<RouteInfo[]> {
+    const routes: RouteInfo[] = [];
+    const fs = await import('fs/promises');
+    const path = await import('path');
+
+    const entries = await fs.readdir(routesDir, { withFileTypes: true });
+
+    for (const entry of entries) {
+      const fullPath = path.join(routesDir, entry.name);
+
+      if (entry.isDirectory()) {
+        const nestedRoutes = await this.parseRemixRoutes(fullPath, config);
+        routes.push(...nestedRoutes);
+      } else if (this.isRouteFile(entry.name)) {
+        const route = await this.createRemixRoute(fullPath, config);
+        if (route) routes.push(route);
+      }
+    }
+
+    return routes;
+  }
+
+  private async createRemixRoute(
+    filePath: string,
+    config: ParserConfig
+  ): Promise<RouteInfo | null> {
+    const relativePath = await this.getRelativePath(config.rootDir, filePath);
+
+    // Convert Remix route convention to URL path
+    let routePath = relativePath
+      .replace(/^app\/routes\//, '/')
+      .replace(/\.tsx?$/, '')
+      .replace(/\.jsx?$/, '');
+
+    // Handle Remix route patterns
+    routePath = routePath
+      .replace(/\$/g, ':') // $param → :param
+      .replace(/\[([^\]]+)\]/g, ':$1') // [param] → :param
+      .replace(/\.([^.]+)\.tsx?$/, '/$1'); // nested.route.tsx → /nested/route
+
+    // Remove index from path
+    routePath = routePath.replace(/\/index$/, '/');
+
+    return {
+      path: routePath || '/',
+      filePath: relativePath,
+      router: 'remix',
+      pattern: routePath.includes(':') ? 'dynamic' : 'static'
+    };
+  }
+}
+```
+
+### Integration with NextIntrospect
+
+Once you've created your adapter, you can use it programmatically:
+
+```typescript
+import { NextIntrospect } from 'next-introspect';
+import { MyFrameworkAdapter } from './MyFrameworkAdapter';
+
+// Create introspector with custom adapter
+const introspect = new NextIntrospect('./my-project', {
+  adapters: [new MyFrameworkAdapter()]
+});
+
+// Analyze project
+const result = await introspect.analyze();
+console.log(`Found ${result.routes.length} routes in ${result.project.framework}`);
+```
+
+### Testing Your Adapter
+
+Create comprehensive tests for your adapter:
+
+```typescript
+import { describe, it, expect } from 'vitest';
+import { MyFrameworkAdapter } from './MyFrameworkAdapter';
+
+describe('MyFrameworkAdapter', () => {
+  const adapter = new MyFrameworkAdapter();
+
+  describe('detect', () => {
+    it('should detect framework projects', async () => {
+      const detected = await adapter.detect('./test-project');
+      expect(detected).toBe(true);
+    });
+
+    it('should not detect non-framework projects', async () => {
+      const detected = await adapter.detect('./empty-project');
+      expect(detected).toBe(false);
+    });
+  });
+
+  describe('getProjectInfo', () => {
+    it('should return project information', async () => {
+      const info = await adapter.getProjectInfo('./test-project');
+      expect(info.framework).toBe('myframework');
+      expect(info.version).toBeDefined();
+    });
+  });
+
+  describe('getRoutes', () => {
+    it('should analyze routes correctly', async () => {
+      const routes = await adapter.getRoutes('./test-project', 'detailed');
+      expect(Array.isArray(routes)).toBe(true);
+      expect(routes[0]).toHaveProperty('path');
+      expect(routes[0]).toHaveProperty('filePath');
+    });
+  });
+});
+```
+
+### Best Practices
+
+1. **Framework Detection**: Check for both dependencies and framework-specific files
+2. **Error Handling**: Use try-catch blocks and provide meaningful error messages
+3. **Path Normalization**: Use `this.normalizePath()` and `this.getRelativePath()` for cross-platform compatibility
+4. **Configuration Parsing**: Handle both JavaScript and JSON configuration files
+5. **Route Patterns**: Accurately identify static, dynamic, and catch-all routes
+6. **Testing**: Create comprehensive tests covering different project structures
+7. **Documentation**: Document your adapter's specific requirements and limitations
+
+### Contributing Your Adapter
+
+If you've created an adapter for a popular framework, consider contributing it back to the project:
+
+1. Create a new file in `src/adapters/YourFrameworkAdapter.ts`
+2. Add comprehensive tests in `tests/adapters/`
+3. Update the main `index.ts` to export your adapter
+4. Add documentation to the README
+5. Submit a pull request
+
+This extensibility makes next-introspect a powerful tool for analyzing routing structures across the entire JavaScript ecosystem.
 
 ## 🔧 Configuration Options
 
@@ -968,9 +1407,9 @@ bun run test
 
 ### Adding New Features
 
-1. **New Output Format**: Extend the `Formatter` interface
-2. **New Framework**: Implement the `FrameworkAdapter` interface
-3. **New Parser**: Create a parser class with static methods
+1. **New Output Format**: Extend the `Formatter` interface in `src/formatters/`
+2. **New Framework Adapter**: See the comprehensive guide in the "Creating Custom Adapters" section above
+3. **New Parser**: Create a parser class with static methods in `src/parsers/`
 
 ## 🤝 Contributing
 

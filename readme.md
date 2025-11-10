@@ -1303,17 +1303,6 @@ describe('MyFrameworkAdapter', () => {
 6. **Testing**: Create comprehensive tests covering different project structures
 7. **Documentation**: Document your adapter's specific requirements and limitations
 
-### Contributing Your Adapter
-
-If you've created an adapter for a popular framework, consider contributing it back to the project:
-
-1. Create a new file in `src/adapters/YourFrameworkAdapter.ts`
-2. Add comprehensive tests in `tests/adapters/`
-3. Update the main `index.ts` to export your adapter
-4. Add documentation to the README
-5. Submit a pull request
-
-This extensibility makes next-introspect a powerful tool for analyzing routing structures across the entire JavaScript ecosystem.
 
 ## 🔧 Configuration Options
 
@@ -1418,18 +1407,6 @@ bun run test
 
 ## 🤝 Contributing
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
-
-## 📄 License
-
-MIT License - see LICENSE file for details.
-
-## 🤝 Contributing
-
 This package is developed by [Webdesign29](https://webdesign29.net/) for the community. We welcome contributions from everyone!
 
 ### How to Contribute
@@ -1455,11 +1432,27 @@ bun run build
 bun run dev
 ```
 
+### Contributing Adapters
+
+If you've created an adapter for a popular framework, consider contributing it back to the project:
+
+1. Create a new file in `src/adapters/YourFrameworkAdapter.ts`
+2. Add comprehensive tests in `tests/adapters/`
+3. Update the main `index.ts` to export your adapter
+4. Add documentation to the README
+5. Submit a pull request
+
+This extensibility makes next-introspect a powerful tool for analyzing routing structures across the entire JavaScript ecosystem.
+
 ### Issues & Feature Requests
 
 - **Bug reports**: Please use the GitHub issue tracker
 - **Feature requests**: Open an issue with the "enhancement" label
 - **Questions**: Check the documentation or ask in discussions
+
+## 📄 License
+
+MIT License - see LICENSE file for details.
 
 ## 🙏 Acknowledgments
 

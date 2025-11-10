@@ -1,0 +1,64 @@
+---
+title: Next Introspect
+description: Comprehensive Next.js project introspection tool that analyzes routing structures and generates detailed metadata
+---
+
+[![npm version](https://badge.fury.io/js/next-introspect.svg)](https://badge.fury.io/js/next-introspect)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Node.js Version](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen)](https://nodejs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+
+A comprehensive Next.js project introspection tool that analyzes routing structures, detects framework configurations, and provides detailed metadata about your Next.js application.
+
+## 🚀 Quick Start
+
+**Install globally for CLI usage:**
+```bash
+npm install -g next-introspect
+# or
+bun add -g next-introspect
+```
+
+**Analyze your Next.js project:**
+```bash
+next-introspect introspect . --format typescript --output routes.ts
+```
+
+**Use in your code:**
+```typescript
+import { routes } from './routes';
+
+const postUrl = routes.blog.posts.byId({ id: "123" });
+// → "/blog/posts/123"
+```
+
+## ✨ Features
+
+- **Framework Detection**: Automatically detects Next.js projects and router types (App Router, Pages Router, or both)
+- **Route Analysis**: Comprehensive analysis of all routes including dynamic routes, API routes, and special pages
+- **Multiple Output Formats**: Export results as JavaScript objects, JSON, or Markdown documentation
+- **Analysis Modes**: Choose between basic, detailed, or comprehensive analysis levels
+- **App Router Support**: Full support for Next.js 13+ App Router with special files, route groups, and metadata
+- **Pages Router Support**: Complete analysis of traditional Pages Router with API routes and data fetching
+- **Configuration Parsing**: Extracts Next.js configuration and project metadata
+- **CLI Tool**: Command-line interface for quick analysis and file export
+- **TypeScript**: Full TypeScript support with comprehensive type definitions
+- **Watch Mode**: Continuously monitors your project for changes and automatically re-analyzes when routes are modified
+
+## 📖 Installation
+
+### Global Installation (CLI)
+
+```bash
+bun add -g next-introspect
+# or
+npm install -g next-introspect
+```
+
+### Local Installation (Programmatic)
+
+```bash
+bun add next-introspect
+# or
+npm install next-introspect
+```

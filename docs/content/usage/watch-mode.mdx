@@ -1,0 +1,59 @@
+---
+title: Watch Mode
+description: Automatically re-analyze your project when files change
+---
+
+## Watch Mode
+
+Watch mode continuously monitors your Next.js project for file changes and automatically re-runs the analysis when routes, components, or configuration files are modified.
+
+```bash
+# Start watch mode with default settings
+next-introspect introspect . --watch
+
+# Watch mode with custom format and output
+next-introspect introspect . --watch --format typescript --output routes.ts
+
+# Watch mode with quiet output (only show changes)
+next-introspect introspect . --watch --quiet --output routes.json
+
+# Combine with other options
+next-introspect introspect . --watch --mode comprehensive --format markdown --output ROUTES.md
+```
+
+### Features
+
+- **Automatic Re-analysis**: Re-runs analysis whenever relevant files change
+- **Smart Filtering**: Only watches route-related files (ignores node_modules, .next, etc.)
+- **Debounced Updates**: Prevents excessive re-runs during rapid file changes
+- **Clean Output**: Shows file change notifications and analysis results
+- **Graceful Shutdown**: Properly handles Ctrl+C to stop watching
+
+### Watched File Types
+
+Watch mode monitors these file extensions for changes:
+- `.js`, `.jsx`, `.ts`, `.tsx` - Route components and API handlers
+- `.json` - Package.json and configuration files
+- Configuration files - `next.config.*`, `tsconfig.json`, etc.
+
+### Ignored Directories
+
+The following directories are automatically ignored:
+- `node_modules/` - Dependencies
+- `.next/` - Build output
+- `.git/` - Version control
+- `dist/` - Distribution files
+- `build/` - Build artifacts
+
+### Usage Examples
+
+```bash
+# Development workflow: Watch for changes during development
+next-introspect introspect . --watch --format typescript --output src/routes.ts
+
+# Documentation: Auto-update route documentation
+next-introspect introspect . --watch --format markdown --output docs/ROUTES.md
+
+# CI/CD: Monitor route changes in deployment pipeline
+next-introspect introspect . --watch --quiet --output routes.json
+```

@@ -1,0 +1,87 @@
+---
+title: Analysis Modes
+description: Different levels of analysis for your Next.js projects
+---
+
+## 📊 Analysis Modes
+
+### Basic Mode
+- Route paths and patterns
+- Dynamic segment detection
+- Router type identification
+- **Fastest analysis**
+
+### Detailed Mode
+- Everything in basic mode
+- Component types (server/client)
+- Special files detection
+- Route group and parallel route identification
+
+### Comprehensive Mode
+- Everything in detailed mode
+- Exported functions and metadata
+- Data fetching methods (getStaticProps, getServerSideProps, etc.)
+- Next.js configuration parsing
+- **Most detailed but slower**
+
+## 🎯 Path Display Styles
+
+The package provides flexible path display options to customize how file paths are shown in the output.
+
+### Route Groups
+
+**Important**: Next.js route groups (folders wrapped in parentheses like `(dashboard)`) are **not** part of the actual URL path. They are organizational only. The package correctly excludes route groups from the `path` field while preserving them in the `filePath` field.
+
+**Example:**
+- File: `src/app/(dashboard)/customer/page.tsx`
+- Route Path: `/customer` ✅
+- File Path: `src/app/(dashboard)/customer/page.tsx` ✅
+
+### Available Styles
+
+- **`absolute`** (default): Show full absolute paths
+- **`relative-to-project`**: Show paths relative to the project root directory
+- **`relative-to-app`**: Show paths relative to the app directory (`src/app` or `app/`)
+- **`relative-to-pages`**: Show paths relative to the pages directory (`src/pages` or `pages/`)
+- **`strip-prefix`**: Strip a custom prefix from paths
+
+### Usage
+
+```typescript
+// Programmatic usage
+const introspect = new NextIntrospect('./my-app', {
+  pathDisplay: {
+    style: 'relative-to-project',
+    showFilePaths: true
+  }
+});
+```
+
+### Examples
+
+```bash
+# Default: absolute paths
+next-introspect introspect .
+# filePath: "/full/path/to/project/src/app/page.tsx"
+
+# Relative to project root
+next-introspect introspect . --path-style relative-to-project --show-file-paths
+# filePath: "src/app/page.tsx"
+
+# Relative to app directory
+next-introspect introspect . --path-style relative-to-app --show-file-paths
+# filePath: "page.tsx"
+
+# Strip custom prefix
+next-introspect introspect . --path-style strip-prefix --strip-prefix "src/" --show-file-paths
+# filePath: "app/page.tsx"
+
+# Package.json summary (much more concise)
+next-introspect introspect . --package-summary
+
+# Include scripts in summary
+next-introspect introspect . --package-summary --include-scripts
+
+# Include dependencies in summary
+next-introspect introspect . --package-summary --include-deps
+```

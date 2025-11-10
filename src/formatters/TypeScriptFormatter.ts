@@ -467,7 +467,7 @@ export class TypeScriptFormatter implements Formatter {
       for (const [key, val] of sortedEntries) {
         if (key === "index") {
           // Handle index properties specially - use "index" as property name
-          result += `  index: "${this.stripPathPrefixes(val)}"`;
+          result += `  index: "${this.stripPathPrefixes(val as string)}"`;
         } else {
           result += `  ${key}: `;
           if (typeof val === "string") {

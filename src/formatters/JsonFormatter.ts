@@ -16,7 +16,17 @@ export class JsonFormatter implements Formatter {
    * Format the introspection result as JSON
    */
   format(result: IntrospectionResult): string {
-    return JSON.stringify(result, null, this.indent);
+    // Handle circular references by using a replacer that detects them
+    const seen = new WeakSet();
+    return JSON.stringify(result, (key, value) => {
+      if (typeof value === "object" && value !== null) {
+        if (seen.has(value)) {
+          return "[Circular Reference]";
+        }
+        seen.add(value);
+      }
+      return value;
+    }, this.indent);
   }
 
   /**

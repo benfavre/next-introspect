@@ -122,6 +122,13 @@ export class NextIntrospect {
   }
 
   /**
+   * Get the complete introspection result as an object (alias for getResult)
+   */
+  exportToObject(): IntrospectionResult {
+    return this.getResult();
+  }
+
+  /**
    * Get the complete introspection result
    */
   getResult(): IntrospectionResult {

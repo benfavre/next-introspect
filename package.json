@@ -17,7 +17,10 @@
     "scripts": {
         "build": "tsup src/index.ts src/cli.ts --format esm --dts",
         "dev": "tsup src/index.ts src/cli.ts --format esm --dts --watch",
-        "type-check": "tsc --noEmit"
+        "type-check": "tsc --noEmit",
+        "test": "vitest run",
+        "test:watch": "vitest",
+        "test:coverage": "vitest run --coverage"
     },
     "dependencies": {
         "commander": "^11.1.0",
@@ -25,8 +28,10 @@
     },
     "devDependencies": {
         "@types/node": "^20.10.0",
+        "@vitest/coverage-v8": "^1.0.0",
         "tsup": "^8.0.1",
-        "typescript": "^5.9.0"
+        "typescript": "^5.9.0",
+        "vitest": "^1.0.0"
     },
     "keywords": [
         "nextjs",
@@ -43,10 +48,11 @@
         "type": "git",
         "url": "git+https://github.com/benfavre/next-introspect.git"
     },
-    "homepage": "https://github.com/benfavre/next-introspect#readme",
+    "homepage": "https://benfavre.github.io/next-introspect/",
     "bugs": {
         "url": "https://github.com/benfavre/next-introspect/issues"
     },
+    "docs": "https://benfavre.github.io/next-introspect/",
     "engines": {
         "node": ">=18.0.0"
     },

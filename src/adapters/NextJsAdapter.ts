@@ -76,7 +76,7 @@ export class NextJsAdapter extends BaseAdapter {
       framework: "nextjs",
       version: nextVersion || "unknown",
       router,
-      rootDir: await this.normalizePath(projectPath),
+      rootDir: projectPath,
       config,
       packageInfo,
       sourceDirs,

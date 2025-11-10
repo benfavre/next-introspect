@@ -1,0 +1,57 @@
+---
+title: Programmatic API
+description: Use Next Introspect programmatically in your applications
+---
+
+## Programmatic API
+
+```typescript
+import { NextIntrospect } from 'next-introspect';
+
+// Create introspector instance
+const introspect = new NextIntrospect('/path/to/nextjs/project', {
+  mode: 'comprehensive'
+});
+
+// Analyze project
+const projectInfo = await introspect.analyze();
+
+// Get routes
+const routes = introspect.getRoutes();
+
+// Format results
+const jsonResult = introspect.format('json');
+const markdownResult = introspect.format('markdown');
+const typescriptResult = introspect.format('typescript');
+const objectResult = introspect.format('object');
+
+// Export to file
+await introspect.exportToFile('routes.json', 'json');
+
+// Change analysis mode
+introspect.setMode('detailed');
+await introspect.reanalyze();
+```
+
+### Advanced API Usage
+
+```typescript
+import { NextIntrospect } from 'next-introspect';
+
+const introspect = new NextIntrospect('./my-nextjs-app');
+
+// Get comprehensive result
+const result = await introspect.analyze();
+
+// Filter routes by type
+const appRoutes = introspect.getRoutesByRouter('app');
+const pagesRoutes = introspect.getRoutesByRouter('pages');
+const apiRoutes = introspect.getApiRoutes();
+const dynamicRoutes = introspect.getDynamicRoutes();
+const specialPages = introspect.getSpecialPages();
+
+// Access raw project info
+const projectInfo = introspect.getProjectInfo();
+console.log(`Framework: ${projectInfo.framework} ${projectInfo.version}`);
+console.log(`Router: ${projectInfo.router}`);
+```

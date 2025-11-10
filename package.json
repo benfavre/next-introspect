@@ -1,0 +1,58 @@
+{
+    "name": "next-introspect",
+    "version": "0.3.0",
+    "description": "Project introspection tool that analyzes routing structures and generates detailed metadata, supports Next.js for now",
+    "type": "module",
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "bin": {
+        "next-introspect": "bin/cli.js"
+    },
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "import": "./dist/index.js"
+        }
+    },
+    "scripts": {
+        "build": "tsup src/index.ts src/cli.ts --format esm --dts",
+        "dev": "tsup src/index.ts src/cli.ts --format esm --dts --watch",
+        "type-check": "tsc --noEmit"
+    },
+    "dependencies": {
+        "commander": "^11.1.0",
+        "chalk": "^5.3.0"
+    },
+    "devDependencies": {
+        "@types/node": "^20.10.0",
+        "tsup": "^8.0.1",
+        "typescript": "^5.9.0"
+    },
+    "keywords": [
+        "nextjs",
+        "introspection",
+        "routing",
+        "analysis",
+        "cli",
+        "app-router",
+        "pages-router"
+    ],
+    "author": "Company Manager Team",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/company-manager/next-introspect.git"
+    },
+    "homepage": "https://github.com/company-manager/next-introspect#readme",
+    "bugs": {
+        "url": "https://github.com/company-manager/next-introspect/issues"
+    },
+    "engines": {
+        "node": ">=18.0.0"
+    },
+    "files": [
+        "dist",
+        "bin",
+        "README.md"
+    ]
+}

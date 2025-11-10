@@ -1,0 +1,969 @@
+# Next.js Introspect
+
+A comprehensive Next.js project introspection tool that analyzes routing structures, detects framework configurations, and provides detailed metadata about your Next.js application.
+
+## ✨ Features
+
+- **Framework Detection**: Automatically detects Next.js projects and router types (App Router, Pages Router, or both)
+- **Route Analysis**: Comprehensive analysis of all routes including dynamic routes, API routes, and special pages
+- **Multiple Output Formats**: Export results as JavaScript objects, JSON, or Markdown documentation
+- **Analysis Modes**: Choose between basic, detailed, or comprehensive analysis levels
+- **App Router Support**: Full support for Next.js 13+ App Router with special files, route groups, and metadata
+- **Pages Router Support**: Complete analysis of traditional Pages Router with API routes and data fetching
+- **Configuration Parsing**: Extracts Next.js configuration and project metadata
+- **CLI Tool**: Command-line interface for quick analysis and file export
+- **TypeScript**: Full TypeScript support with comprehensive type definitions
+
+## 🚀 Installation
+
+### Global Installation (CLI)
+
+```bash
+bun add -g next-introspect
+# or
+npm install -g next-introspect
+```
+
+### Local Installation (Programmatic)
+
+```bash
+bun add next-introspect
+# or
+npm install next-introspect
+```
+
+## 📖 Usage
+
+### Command Line Interface
+
+#### Basic Usage
+
+```bash
+# Analyze current directory
+next-introspect .
+
+# Analyze specific project
+next-introspect /path/to/nextjs/project
+```
+
+#### Output Formats
+
+```bash
+# Export as JSON
+next-introspect . --format json --output routes.json
+
+# Generate Markdown documentation
+next-introspect . --format markdown --output ROUTES.md
+
+# Generate TypeScript types for type-safe route access
+next-introspect . --format typescript --output routes.ts
+
+# Pretty-printed JSON with custom indentation
+next-introspect . --format json --indent 4
+```
+
+#### Analysis Modes
+
+```bash
+# Basic analysis (fastest)
+next-introspect . --mode basic
+
+# Detailed analysis (includes component types)
+next-introspect . --mode detailed
+
+# Comprehensive analysis (includes all metadata and exports)
+next-introspect . --mode comprehensive
+```
+
+#### Path Display Options
+
+```bash
+# Show paths relative to project root
+next-introspect . --path-style relative-to-project --show-file-paths
+
+# Show paths relative to app directory
+next-introspect . --path-style relative-to-app --show-file-paths
+
+# Strip custom prefix from paths
+next-introspect . --path-style strip-prefix --strip-prefix "src/app" --show-file-paths
+
+# Combine with other options
+next-introspect . --format json --path-style relative-to-project --show-file-paths --output routes.json
+```
+
+#### Advanced Options
+
+```bash
+# Quiet mode (suppress progress messages)
+next-introspect . --quiet --output result.json
+
+# Full command with all options
+next-introspect /path/to/project \
+  --format markdown \
+  --mode comprehensive \
+  --output project-routes.md
+```
+
+#### Watch Mode
+
+Watch mode continuously monitors your Next.js project for file changes and automatically re-runs the analysis when routes, components, or configuration files are modified.
+
+```bash
+# Start watch mode with default settings
+next-introspect . --watch
+
+# Watch mode with custom format and output
+next-introspect . --watch --format typescript --output routes.ts
+
+# Watch mode with quiet output (only show changes)
+next-introspect . --watch --quiet --output routes.json
+
+# Combine with other options
+next-introspect . --watch --mode comprehensive --format markdown --output ROUTES.md
+```
+
+### Features
+
+- **Automatic Re-analysis**: Re-runs analysis whenever relevant files change
+- **Smart Filtering**: Only watches route-related files (ignores node_modules, .next, etc.)
+- **Debounced Updates**: Prevents excessive re-runs during rapid file changes
+- **Clean Output**: Shows file change notifications and analysis results
+- **Graceful Shutdown**: Properly handles Ctrl+C to stop watching
+
+### Watched File Types
+
+Watch mode monitors these file extensions for changes:
+- `.js`, `.jsx`, `.ts`, `.tsx` - Route components and API handlers
+- `.json` - Package.json and configuration files
+- Configuration files - `next.config.*`, `tsconfig.json`, etc.
+
+### Ignored Directories
+
+The following directories are automatically ignored:
+- `node_modules/` - Dependencies
+- `.next/` - Build output
+- `.git/` - Version control
+- `dist/` - Distribution files
+- `build/` - Build artifacts
+
+### Usage Examples
+
+```bash
+# Development workflow: Watch for changes during development
+next-introspect . --watch --format typescript --output src/routes.ts
+
+# Documentation: Auto-update route documentation
+next-introspect . --watch --format markdown --output docs/ROUTES.md
+
+# CI/CD: Monitor route changes in deployment pipeline
+next-introspect . --watch --quiet --output routes.json
+```
+
+### Programmatic API
+
+```typescript
+import { NextIntrospect } from 'next-introspect';
+
+// Create introspector instance
+const introspect = new NextIntrospect('/path/to/nextjs/project', {
+  mode: 'comprehensive'
+});
+
+// Analyze project
+const projectInfo = await introspect.analyze();
+
+// Get routes
+const routes = introspect.getRoutes();
+
+// Format results
+const jsonResult = introspect.format('json');
+const markdownResult = introspect.format('markdown');
+const typescriptResult = introspect.format('typescript');
+const objectResult = introspect.format('object');
+
+// Export to file
+await introspect.exportToFile('routes.json', 'json');
+
+// Change analysis mode
+introspect.setMode('detailed');
+await introspect.reanalyze();
+```
+
+#### Advanced API Usage
+
+```typescript
+import { NextIntrospect } from 'next-introspect';
+
+const introspect = new NextIntrospect('./my-nextjs-app');
+
+// Get comprehensive result
+const result = await introspect.analyze();
+
+// Filter routes by type
+const appRoutes = introspect.getRoutesByRouter('app');
+const pagesRoutes = introspect.getRoutesByRouter('pages');
+const apiRoutes = introspect.getApiRoutes();
+const dynamicRoutes = introspect.getDynamicRoutes();
+const specialPages = introspect.getSpecialPages();
+
+// Access raw project info
+const projectInfo = introspect.getProjectInfo();
+console.log(`Framework: ${projectInfo.framework} ${projectInfo.version}`);
+console.log(`Router: ${projectInfo.router}`);
+```
+
+## 📊 Analysis Modes
+
+### Basic Mode
+- Route paths and patterns
+- Dynamic segment detection
+- Router type identification
+- **Fastest analysis**
+
+### Detailed Mode
+- Everything in basic mode
+- Component types (server/client)
+- Special files detection
+- Route group and parallel route identification
+
+### Comprehensive Mode
+- Everything in detailed mode
+- Exported functions and metadata
+- Data fetching methods (getStaticProps, getServerSideProps, etc.)
+- Next.js configuration parsing
+- **Most detailed but slower**
+
+## 🎯 Path Display Styles
+
+The package provides flexible path display options to customize how file paths are shown in the output.
+
+### Route Groups
+
+**Important**: Next.js route groups (folders wrapped in parentheses like `(dashboard)`) are **not** part of the actual URL path. They are organizational only. The package correctly excludes route groups from the `path` field while preserving them in the `filePath` field.
+
+**Example:**
+- File: `src/app/(dashboard)/customer/page.tsx`
+- Route Path: `/customer` ✅
+- File Path: `src/app/(dashboard)/customer/page.tsx` ✅
+
+### Available Styles
+
+- **`absolute`** (default): Show full absolute paths
+- **`relative-to-project`**: Show paths relative to the project root directory
+- **`relative-to-app`**: Show paths relative to the app directory (`src/app` or `app/`)
+- **`relative-to-pages`**: Show paths relative to the pages directory (`src/pages` or `pages/`)
+- **`strip-prefix`**: Strip a custom prefix from paths
+
+### Usage
+
+```typescript
+// Programmatic usage
+const introspect = new NextIntrospect('./my-app', {
+  pathDisplay: {
+    style: 'relative-to-project',
+    showFilePaths: true
+  }
+});
+```
+
+### Examples
+
+```bash
+# Default: absolute paths
+next-introspect .
+# filePath: "/full/path/to/project/src/app/page.tsx"
+
+# Relative to project root
+next-introspect . --path-style relative-to-project --show-file-paths
+# filePath: "src/app/page.tsx"
+
+# Relative to app directory
+next-introspect . --path-style relative-to-app --show-file-paths
+# filePath: "page.tsx"
+
+# Strip custom prefix
+next-introspect . --path-style strip-prefix --strip-prefix "src/" --show-file-paths
+# filePath: "app/page.tsx"
+
+# Package.json summary (much more concise)
+next-introspect . --package-summary
+
+# Include scripts in summary
+next-introspect . --package-summary --include-scripts
+
+# Include dependencies in summary
+next-introspect . --package-summary --include-deps
+```
+
+## 📝 Route Metadata
+
+Add human-readable titles and descriptions to your routes by providing a metadata file.
+
+### JSON Format
+
+```json
+[
+  {
+    "magazine.publisher": {
+      "title": "Magazine Publisher",
+      "description": "Manage magazine publishing workflows"
+    }
+  },
+  {
+    "magazine.publisher.templates": {
+      "title": "Publisher Templates",
+      "description": "Templates for magazine publishing",
+      "category": "admin"
+    }
+  }
+]
+```
+
+### TOML Format
+
+```toml
+[magazine.publisher]
+title = "Magazine Publisher"
+description = "Manage magazine publishing workflows"
+
+[magazine.publisher.templates]
+title = "Publisher Templates"
+description = "Templates for magazine publishing"
+category = "admin"
+```
+
+### Usage
+
+```bash
+# Exclude specific fields from output
+next-introspect introspect . --exclude-fields "filePath,pattern,router" --format json
+
+# Combine with other options
+next-introspect introspect . --exclude-fields "filePath" --metadata routes.json --format markdown
+
+# Use JSON metadata file
+next-introspect introspect . --metadata routes.json --format markdown
+
+# Use TOML metadata file
+next-introspect introspect . --metadata routes.toml --format json
+```
+
+## 🔀 Merging Existing Results
+
+Merge existing introspection JSON files with additional metadata without re-analyzing the project.
+
+### Programmatic Usage
+
+```typescript
+// Merge metadata into existing results
+const introspect = new NextIntrospect('./dummy', {});
+const mergedResult = await introspect.mergeWithJson('existing-routes.json', {
+  'magazine.publisher': {
+    title: 'Magazine Publisher',
+    description: 'Manage magazine publishing workflows'
+  }
+});
+
+// Merge full introspection results
+const mergedResult = await introspect.mergeWithJson('routes1.json', otherIntrospectionResult);
+```
+
+### CLI Usage
+
+```bash
+# Merge JSON file with metadata
+next-introspect merge routes.json metadata.json --output merged.json
+
+# Merge and output as Markdown
+next-introspect merge routes.json metadata.json --format markdown --output merged.md
+
+# Merge with different indentation
+next-introspect merge routes.json metadata.json --indent 4
+```
+
+### Use Cases
+
+- **Incremental Updates**: Add metadata to existing route analysis
+- **Collaborative Workflows**: Different team members add different types of metadata
+- **Automation**: CI/CD pipelines can add environment-specific metadata
+- **Version Control**: Keep route analysis and human-readable metadata separate
+
+### Key Matching
+
+Metadata is matched to routes using multiple strategies:
+1. **Exact path match**: `/magazine/publisher`
+2. **Dot notation**: `magazine.publisher` (path segments joined with dots)
+3. **Router prefix**: `app.magazine.publisher` (with router type prefix)
+
+## 🎯 Output Formats
+
+## 🏗️ Nested Route Structure
+
+The `--nested` option transforms the flat route array into a hierarchical JSON structure that mirrors your application's URL paths.
+
+### Flat Structure (Default)
+
+```json
+{
+  "routes": [
+    { "path": "/customer/shipping/notifications", "router": "app" },
+    { "path": "/customer/shipping", "router": "app" },
+    { "path": "/magazine", "router": "app" }
+  ]
+}
+```
+
+### Nested Structure (`--nested`)
+
+```json
+{
+  "routes": {
+    "customer": {
+      "shipping": {
+        "notifications": { "router": "app", "filePath": "..." },
+        "": { "router": "app", "filePath": "..." }  // /customer/shipping route
+      }
+    },
+    "magazine": { "router": "app", "filePath": "..." }
+  }
+}
+```
+
+### Benefits
+
+- **Visual hierarchy**: See your route structure at a glance
+- **Path relationships**: Understand parent-child route relationships
+- **Easier navigation**: Programmatically traverse route trees
+- **URL mirroring**: Structure matches actual application URLs
+
+### Options
+
+- **`--nested`**: Enable nested output format
+- **`--include-empty-segments`**: Include empty path segments (for root routes)
+
+## 🔷 TypeScript Output Format
+
+The `--format typescript` option generates **tree-shakable** TypeScript code that provides **type-safe route access** using dot notation. Each top-level route is exported as a named export for optimal bundler tree-shaking.
+
+### Generated Structure
+
+```typescript
+// Ultra-granular named exports for maximum tree-shaking
+export const blog = { index: { path: "/blog" }, posts: { byId: { path: "/blog/posts/[id]", get: ... }, bySlugRest: { path: "/blog/posts/[...slug]", get: ... } } };
+export const blog_posts = { byId: { path: "/blog/posts/[id]", get: ... }, bySlugRest: { path: "/blog/posts/[...slug]", get: ... } };
+export const blog_posts_byId = { path: "/blog/posts/[id]", get: ({ id }: { id: string }) => `/blog/posts/${id}` };
+export const blog_posts_bySlugRest = { path: "/blog/posts/[...slug]", get: ({ slug }: { slug: string }) => `/blog/posts/${slug}` };
+export const settings = { socialAccounts: { path: "/settings/social-accounts" } };
+export const settings_socialAccounts = { path: "/settings/social-accounts" };
+
+// Getter-based routes object mirroring the structure (tree-shakable)
+export const routes = {
+  get blog() {
+    return {
+  get posts() {
+    return {
+  get byId() {
+    return blog_posts_byId;
+  }
+    };
+  }
+    };
+  },
+  get settings() {
+    return {
+  get socialAccounts() {
+    return settings_socialAccounts;
+  }
+    };
+  }
+} as const;
+
+// Default export for convenience
+export default routes;
+  fournisseur: {
+    byVendorId: {
+      path: "/fournisseur/[vendorId]",  // Dynamic segment [vendorId]
+      get: ({ vendorId }: { vendorId: string }) => `/fournisseur/${vendorId}`
+    },
+    login: {
+      path: "/fournisseur/login"
+    },
+    session: {
+      path: "/fournisseur/session"
+    }
+  },
+  sites: {
+    avivre_com: {
+      path: "/sites/avivre.com"  // /sites/avivre.com → dots become underscores
+    },
+    gestionEnt_fr: {
+      path: "/sites/gestion-ent.fr"  // /sites/gestion-ent.fr → camelCase + underscores
+    }
+  }
+} as const;
+
+export type Routes = typeof routes;
+```
+
+### Usage in Your Code
+
+```typescript
+// Maximum tree-shaking: import only what you need
+import { blog_posts_byId } from './routes';
+
+// Only the specific route is included in your bundle
+const postUrl = blog_posts_byId.get({ id: "123" });     // "/blog/posts/123"
+
+// Ultra tree-shakable imports (recommended for minimal bundles)
+import { fournisseur_byVendorId } from './routes';       // Only imports this specific route
+const url1 = fournisseur_byVendorId({ vendorId: "123" }); // "/fournisseur/123"
+
+// Tree-shakable section imports
+import { blog_posts } from './routes';                   // Includes posts.byId
+import { blog } from './routes';                         // Includes entire blog tree
+
+// Convenient dot notation (still tree-shakable!)
+import { routes } from './routes';
+const postUrl = routes.blog.posts.byId({ id: "123" });  // IntelliSense: "URL: /blog/posts/<id>"
+const vendorUrl = routes.fournisseur.byVendorId({ vendorId: "abc" }); // IntelliSense: "URL: /fournisseur/<vendorId>"
+
+// Access the path template
+const postTemplate = routes.blog.posts.byId.path;       // "/blog/posts/[id]"
+
+// Traditional get method still available (backward compatibility)
+const altUrl = routes.blog.posts.byId.get({ id: "123" }); // Same result
+
+// Use with Next.js Link or router.push
+<Link href={routes.blog.posts.byId.get({ id: postId })}>
+  View Post
+</Link>
+
+// TypeScript will infer the correct types automatically
+function navigateTo(route: string) {
+  // route is typed as a union of all possible route strings
+}
+```
+
+### Features
+
+- **Type Safety**: Full TypeScript intellisense and compile-time checking through `as const`
+- **Dot Notation**: Access routes using familiar JavaScript object notation
+- **Consistent API**: All routes have a `path` property for uniform access
+- **Parameterized Routes**: Dynamic routes include type-safe getter methods (e.g., `byId.get({ id: "123" })`)
+- **Special Character Handling**: Hyphens become camelCase, dots become underscores
+- **Route Filtering**: Only includes actual navigable routes (page.tsx files), excludes special Next.js files
+- **Catch-All Route Support**: `[...slug]` becomes `bySlugRest`, `[[...slug]]` becomes `bySlugOptional`
+- **Auto-completion**: IDEs provide full auto-completion for all routes and parameters
+- **No Runtime Overhead**: Pure TypeScript `as const` assertions, zero runtime cost
+- **IDE IntelliSense**: JSDoc comments show expected URL patterns (e.g., `URL: /fournisseur/<vendorId>`)
+- **Parameter Validation**: Compile-time checking of required route parameters
+- **Maintainable**: Automatically stays in sync with your route structure
+
+### Benefits
+
+- **🚀 Ultra-Granular Tree-Shaking**: Every route exported individually + direct references in routes object
+- **📦 Minimal Bundle Size**: Direct references enable tree-shaking even with dot notation
+- **🚀 True Tree-Shaking**: Bundlers eliminate unused routes regardless of import style
+- **📞 Callable Routes**: Parameterized routes are directly callable: `byId({ id: "123" })`
+- **🎯 Maximum Flexibility**: Import at any granularity from individual routes to entire sections
+- **🔄 Backward Compatible**: Existing `.get()` method still works for gradual migration
+- **🏗️ Structural Mirroring**: The `routes` object perfectly mirrors your route hierarchy
+
+### Command Examples
+
+```bash
+# Generate TypeScript route definitions
+next-introspect . --format typescript --output routes.ts
+
+# Generate with custom namespace
+next-introspect . --format typescript --namespace "AppRoutes" --output app-routes.ts
+
+# Combine with other options
+next-introspect . --format typescript --mode comprehensive --output routes.ts
+```
+
+### Programmatic Generation
+
+```typescript
+import { NextIntrospect } from 'next-introspect';
+
+const introspect = new NextIntrospect('./my-app');
+await introspect.analyze();
+
+// Generate TypeScript routes
+const typescriptCode = introspect.format('typescript');
+await introspect.exportToFile('routes.ts', 'typescript');
+```
+
+This format is perfect for applications that need type-safe route references throughout the codebase, providing both runtime values and compile-time type checking.
+
+## 🚫 Excluding Fields
+
+Remove unwanted fields from the output to create cleaner, more focused results.
+
+### Available Options
+
+- **`--exclude-fields <fields>`**: Comma-separated list of fields to exclude from route objects
+- **`--strip-prefixes <prefixes>`**: Strip multiple prefixes from route paths (TypeScript format only)
+
+### Common Exclusions
+
+```bash
+# Remove file system information
+next-introspect introspect . --exclude-fields "filePath" --format json
+```
+
+## 🎯 Strip Prefixes from Route Paths
+
+The `--strip-prefixes` option allows you to remove common prefixes from route paths when generating TypeScript route definitions. This is useful for creating route definitions that are relative to specific sections of your application. **Prefix stripping only affects the final path values in the output - the route structure and hierarchy remain unchanged.** All resulting paths will have a leading slash (/).
+
+### Usage
+
+```bash
+# Strip single prefix
+next-introspect introspect . --format typescript --strip-prefixes "/sites/" --output routes.ts
+
+# Strip multiple prefixes (comma-separated in single option)
+next-introspect introspect . --format typescript --strip-prefixes "/sites/,/default/,/api/" --output routes.ts
+
+# Strip multiple prefixes (multiple --strip-prefixes flags) - RECOMMENDED
+next-introspect introspect . --format typescript \
+  --strip-prefixes "/sites/" \
+  --strip-prefixes "/default/" \
+  --strip-prefixes "/api/" \
+  --output routes.ts
+
+# Use regex patterns (surrounded by double forward slashes)
+next-introspect introspect . --format typescript --strip-prefixes "//\/sites\/[^\/]+\///" --output routes.ts
+```
+
+### Example: Multi-Tenant Site Routes
+
+```bash
+# Strip /sites/ prefix (preserves site-specific hierarchy and structure)
+# Before stripping: /sites/avivre.com/magazine/extrait-133-janvier-fevrier-2024
+# After stripping: /avivre.com/magazine/extrait-133-janvier-fevrier-2024
+# Structure preserved: routes.sites.avivre_com.magazine.extrait_133JanvierFevrier_2024.path
+next-introspect introspect . --format typescript --strip-prefixes "/sites/" --output routes.ts
+
+# Use regex to strip /sites/{any-site}/ entirely (flattens to root level)
+# Before stripping: /sites/avivre.com/magazine/extrait-133-janvier-fevrier-2024
+# After stripping: /magazine/extrait-133-janvier-fevrier-2024
+# Result: routes.magazine.extrait_133JanvierFevrier_2024.path
+next-introspect introspect . --format typescript --strip-prefixes "//\/sites\/[^\/]+\///" --output routes.ts
+```
+
+### Example: Application Section Routes
+
+```bash
+# Strip common prefixes to create section-specific route definitions
+next-introspect introspect . --format typescript \
+  --strip-prefixes "/default/,/crm/,/customer/,/guide/,/invoice/,/annuaire/,/qr/,/fournisseur/,/shop/,/support/,/publisher/,/hr/,/pos/" \
+  --output routes.ts
+```
+
+### Generated Output
+
+**Before stripping:**
+```typescript
+export const routes = {
+  sites: {
+    avivre_com: {
+      magazine: {
+        extrait_133JanvierFevrier_2024: {
+          path: "/sites/avivre.com/magazine/extrait-133-janvier-fevrier-2024"
+        }
+      }
+    }
+  }
+}
+```
+
+**After stripping `/sites/`:**
+```typescript
+export const routes = {
+  avivre_com: {
+    magazine: {
+      extrait_133JanvierFevrier_2024: {
+        path: "avivre.com/magazine/extrait-133-janvier-fevrier-2024"
+      }
+    }
+  }
+}
+```
+
+**After stripping `/sites/[^/]+//` (regex):**
+```typescript
+export const routes = {
+  magazine: {
+    extrait_133JanvierFevrier_2024: {
+      path: "magazine/extrait-133-janvier-fevrier-2024"
+    }
+  }
+}
+```
+
+### Use Cases
+
+- **Multi-tenant applications**: Strip `/sites/` or `/tenants/` prefixes
+- **API routes**: Remove `/api/` prefixes for cleaner client-side route definitions
+- **Section-specific routing**: Create route definitions scoped to specific app sections
+- **Deployment flexibility**: Generate routes that work in different deployment contexts
+
+**Before (with all fields):**
+```json
+{
+  "path": "/customer/shipping",
+  "filePath": "/app/src/app/customer/shipping/page.tsx",
+  "pattern": "static",
+  "router": "app"
+}
+```
+
+**After (excluding filePath,pattern,router):**
+```json
+{
+  "path": "/customer/shipping"
+}
+```
+
+### Programmatic Usage
+
+```typescript
+const introspect = new NextIntrospect('./project', {
+  outputFormat: {
+    excludeFields: ['filePath', 'pattern', 'router']
+  }
+});
+```
+
+## 🎯 Output Formats
+
+### JSON Format
+
+```json
+{
+  "project": {
+    "framework": "nextjs",
+    "version": "14.0.0",
+    "router": "app",
+    "rootDir": "/path/to/project",
+    "sourceDirs": {
+      "app": "app"
+    }
+  },
+  "routes": [
+    {
+      "path": "/",
+      "filePath": "/path/to/project/app/page.tsx",
+      "pattern": "static",
+      "router": "app",
+      "appRouter": {
+        "segment": "",
+        "specialFiles": {
+          "page": true,
+          "layout": true
+        },
+        "componentTypes": {
+          "page": "server",
+          "layout": "server"
+        }
+      }
+    }
+  ],
+  "metadata": {
+    "analyzedAt": "2024-01-15T10:30:00.000Z",
+    "duration": 245,
+    "filesProcessed": 12,
+    "mode": "comprehensive"
+  }
+}
+```
+
+### Markdown Format
+
+```markdown
+# Next.js Project Introspection
+
+## Project Information
+- **Framework**: nextjs 14.0.0
+- **Router Type**: App Router
+- **Root Directory**: /path/to/project
+
+## Routes Overview
+- **Total Routes**: 8
+- **App Router Routes**: 8
+- **Pages Router Routes**: 0
+- **API Routes**: 0
+- **Dynamic Routes**: 2
+
+## App Router Routes
+
+### /
+- **Pattern**: Static
+- **Special Files**: `layout`, `page`
+- **Components**: layout: server, page: server
+
+### /about
+- **Pattern**: Static
+- **Special Files**: `page`
+- **Components**: page: server
+
+### /products/[slug]
+- **Pattern**: Dynamic
+- **Dynamic Segments**: `slug`
+- **Special Files**: `page`
+- **Components**: page: server
+```
+
+### JavaScript Object Format
+
+Returns the complete `IntrospectionResult` object with full TypeScript typing for programmatic use.
+
+## 🏗️ Architecture
+
+The package is built with a modular architecture:
+
+### Core Components
+
+- **`NextIntrospect`**: Main class providing the public API
+- **`FrameworkAdapter`**: Abstract base for framework-specific analysis
+- **`NextJsAdapter`**: Next.js implementation of framework adapter
+- **Parsers**: Specialized parsers for different routing systems
+  - `AppRouterParser`: Analyzes `app/` directory structure
+  - `PagesRouterParser`: Analyzes `pages/` directory structure
+  - `ConfigParser`: Parses Next.js configuration files
+- **Formatters**: Convert results to different output formats
+  - `ObjectFormatter`: Raw JavaScript object
+  - `JsonFormatter`: JSON serialization
+  - `MarkdownFormatter`: Documentation generation
+
+### Extensibility
+
+The adapter pattern allows adding support for other frameworks:
+
+```typescript
+class RemixAdapter extends BaseAdapter {
+  name = 'remix';
+  // Implement framework-specific analysis
+}
+```
+
+## 🔧 Configuration Options
+
+### IntrospectionOptions
+
+```typescript
+interface IntrospectionOptions {
+  mode?: 'basic' | 'detailed' | 'comprehensive';
+  include?: string[];     // File patterns to include
+  exclude?: string[];     // File patterns to exclude
+  maxDepth?: number;      // Maximum directory depth
+  ignorePatterns?: string[]; // Additional ignore patterns
+  followSymlinks?: boolean;  // Follow symbolic links
+}
+```
+
+### Default Configuration
+
+```typescript
+const defaultOptions: IntrospectionOptions = {
+  mode: 'comprehensive',
+  maxDepth: 10,
+  followSymlinks: false,
+  exclude: [
+    'node_modules/**',
+    '.next/**',
+    'dist/**',
+    'build/**',
+    '**/*.test.*',
+    '**/*.spec.*'
+  ]
+};
+```
+
+## 📝 Route Patterns Detected
+
+### App Router Patterns
+
+- **Static Routes**: `app/page.tsx` → `/`
+- **Dynamic Routes**: `app/products/[id]/page.tsx` → `/products/[id]`
+- **Catch-all Routes**: `app/docs/[...slug]/page.tsx` → `/docs/[...slug]`
+- **Optional Catch-all**: `app/shop/[[...categories]]/page.tsx` → `/shop/[[...categories]]`
+- **Route Groups**: `app/(group)/page.tsx` → `/` (group not in URL)
+- **Parallel Routes**: `app/@modal/page.tsx` → Parallel route slot
+- **Intercepting Routes**: `app/(.)product/page.tsx` → Intercepting route
+
+### Pages Router Patterns
+
+- **Static Routes**: `pages/about.tsx` → `/about`
+- **Dynamic Routes**: `pages/posts/[id].tsx` → `/posts/[id]`
+- **API Routes**: `pages/api/users.ts` → `/api/users`
+- **Special Pages**: `pages/_app.tsx`, `pages/_error.tsx`
+
+## 🎨 Special Files Detected
+
+### App Router Special Files
+
+- `page.tsx/jsx/js/ts` - Route page component
+- `layout.tsx/jsx/js/ts` - Shared layout component
+- `loading.tsx/jsx/js/ts` - Loading UI component
+- `error.tsx/jsx/js/ts` - Error boundary component
+- `not-found.tsx/jsx/js/ts` - 404 page component
+- `template.tsx/jsx/js/ts` - Re-rendered layout template
+- `default.tsx/jsx/js/ts` - Parallel route fallback
+- `route.ts/js` - API route handler
+
+### Pages Router Special Files
+
+- `_app.tsx/jsx/js/ts` - Custom App component
+- `_document.tsx/jsx/js/ts` - Custom Document component
+- `_error.tsx/jsx/js/ts` - Custom error page
+- `404.tsx/jsx/js/ts` - Custom 404 page
+- `500.tsx/jsx/js/ts` - Custom 500 page
+
+## 🚀 Development
+
+### Building
+
+```bash
+# Build the package
+bun run build
+
+# Development build with watch mode
+bun run dev
+```
+
+### Testing
+
+```bash
+# Type checking
+bun run type-check
+
+# Run tests (when implemented)
+bun run test
+```
+
+### Adding New Features
+
+1. **New Output Format**: Extend the `Formatter` interface
+2. **New Framework**: Implement the `FrameworkAdapter` interface
+3. **New Parser**: Create a parser class with static methods
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests if applicable
+5. Submit a pull request
+
+## 📄 License
+
+MIT License - see LICENSE file for details.
+
+## 🙏 Acknowledgments
+
+- Built with Next.js routing knowledge and patterns
+- Inspired by various code analysis and documentation tools
+- Uses Commander.js for CLI functionality

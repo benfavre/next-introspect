@@ -1,6 +1,6 @@
 {
     "name": "next-introspect",
-    "version": "0.3.5",
+    "version": "0.3.6",
     "description": "Project introspection tool that analyzes routing structures and generates detailed metadata, supports Next.js for now",
     "type": "module",
     "main": "./dist/index.js",

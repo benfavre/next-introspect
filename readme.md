@@ -1410,7 +1410,7 @@ bun run test
 
 ## 🤝 Contributing
 
-This package is developed by [Webdesign29](https://webdesign29.net/) for the community. We welcome contributions from everyone!
+This package is developed by [Webdesign29](https://www.webdesign29.net/) for the community. We welcome contributions from everyone!
 
 ### How to Contribute
 

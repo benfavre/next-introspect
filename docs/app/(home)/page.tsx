@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { basePath } from "@/lib/helpers";
 
 export default function HomePage() {
   return (
@@ -23,7 +22,7 @@ export default function HomePage() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
               <Link
-                href={`${basePath}/docs`}
+                href="/docs"
                 className="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-white bg-black hover:bg-gray-800 transition-colors"
               >
                 Get Started
@@ -699,7 +698,7 @@ export default function HomePage() {
               </h3>
               <div className="mb-6">
                 <a
-                  href={`${basePath}/llms-full.txt`}
+                  href="/llms-full.txt"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center justify-center px-6 py-3 text-sm font-semibold text-white bg-black hover:bg-gray-800 transition-colors"
@@ -729,7 +728,7 @@ export default function HomePage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
-              href={`${basePath}/docs`}
+              href="/docs"
               className="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-black bg-white hover:bg-gray-100 transition-colors"
             >
               Read the Docs
@@ -877,7 +876,7 @@ export default function HomePage() {
               <ul className="space-y-4">
                 <li>
                   <Link
-                    href={`${basePath}/docs`}
+                    href="/docs"
                     className="text-gray-400 hover:text-white transition-colors text-base"
                   >
                     Documentation

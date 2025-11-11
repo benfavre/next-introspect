@@ -698,7 +698,7 @@ export default function HomePage() {
               </h3>
               <div className="mb-6">
                 <a
-                  href="/llms-full.txt"
+                  href="/next-introspect/llms-full.txt"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center justify-center px-6 py-3 text-sm font-semibold text-white bg-black hover:bg-gray-800 transition-colors"

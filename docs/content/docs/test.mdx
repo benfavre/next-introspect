@@ -1,0 +1,226 @@
+---
+title: CLI Usage
+description: Learn how to use the next-introspect command-line interface to analyze your Next.js projects
+---
+
+# Command Line Interface
+
+The next-introspect CLI provides a powerful interface for analyzing Next.js projects from the command line.
+
+## Basic Usage
+
+```bash
+# Analyze current directory
+next-introspect introspect .
+
+# Analyze specific project
+next-introspect introspect /path/to/nextjs/project
+```
+
+## Output Formats
+
+### JSON Output
+```bash
+next-introspect introspect . --format json --output routes.json
+```
+
+### Markdown Documentation
+```bash
+next-introspect introspect . --format markdown --output ROUTES.md
+```
+
+### TypeScript Types
+```bash
+next-introspect introspect . --format typescript --output routes.ts
+```
+
+### Pretty-printed JSON
+```bash
+next-introspect introspect . --format json --indent 4
+```
+
+## Analysis Modes
+
+### Basic Analysis (Fastest)
+```bash
+next-introspect introspect . --mode basic
+```
+Includes: route paths, patterns, and basic metadata.
+
+### Detailed Analysis
+```bash
+next-introspect introspect . --mode detailed
+```
+Includes: component types, special files, and extended metadata.
+
+### Comprehensive Analysis (Slowest)
+```bash
+next-introspect introspect . --mode comprehensive
+```
+Includes: all exports, data fetching methods, and complete metadata.
+
+## Path Display Options
+
+### Relative to Project Root
+```bash
+next-introspect introspect . --path-style relative-to-project --show-file-paths
+```
+
+### Relative to App Directory
+```bash
+next-introspect introspect . --path-style relative-to-app --show-file-paths
+```
+
+### Strip Custom Prefix
+```bash
+next-introspect introspect . --path-style strip-prefix --strip-prefix "src/app" --show-file-paths
+```
+
+## Advanced Options
+
+### Quiet Mode
+```bash
+next-introspect introspect . --quiet --output result.json
+```
+
+### Exclude Fields
+```bash
+next-introspect introspect . --exclude-fields "filePath,pattern,router" --format json
+```
+
+### Nested Structure
+```bash
+next-introspect introspect . --nested --format json
+```
+
+### Include Empty Segments
+```bash
+next-introspect introspect . --nested --include-empty-segments --format json
+```
+
+### Package Summary
+```bash
+next-introspect introspect . --package-summary
+next-introspect introspect . --package-summary --include-scripts --include-deps
+```
+
+### Metadata Integration
+```bash
+next-introspect introspect . --metadata metadata.json --format markdown
+```
+
+## Watch Mode
+
+Watch mode continuously monitors your Next.js project for file changes and automatically re-runs the analysis.
+
+### Basic Watch Mode
+```bash
+next-introspect introspect . --watch
+```
+
+### Watch with Custom Output
+```bash
+next-introspect introspect . --watch --format typescript --output routes.ts
+```
+
+### Quiet Watch Mode
+```bash
+next-introspect introspect . --watch --quiet --output routes.json
+```
+
+### Full Watch Command
+```bash
+next-introspect introspect . --watch --mode comprehensive --format markdown --output ROUTES.md
+```
+
+## Merge Command
+
+Merge existing introspection results with additional metadata.
+
+### Basic Merge
+```bash
+next-introspect merge routes.json metadata.json --output merged.json
+```
+
+### Merge with Field Filtering
+```bash
+next-introspect merge routes.json metadata.json --exclude-fields "filePath" --output clean.json
+```
+
+### Merge to Markdown
+```bash
+next-introspect merge routes.json metadata.json --format markdown --output merged.md
+```
+
+## Command Reference
+
+### introspect
+```bash
+next-introspect introspect <projectPath> [options]
+```
+
+**Options:**
+- `-f, --format <format>`: Output format (object, json, markdown, typescript)
+- `-m, --mode <mode>`: Analysis mode (basic, detailed, comprehensive)
+- `-o, --output <file>`: Write output to file instead of console
+- `--indent <number>`: JSON indentation (default: 2)
+- `--quiet`: Suppress progress messages
+- `--path-style <style>`: Path display style (absolute, relative-to-project, relative-to-app, relative-to-pages, strip-prefix)
+- `--strip-prefix <prefix>`: Prefix to strip from paths when using strip-prefix style
+- `--strip-prefixes <prefix>`: Prefix to strip from route paths (can be used multiple times)
+- `--show-file-paths`: Format file paths according to the path style
+- `--package-summary`: Show only package.json summary
+- `--include-scripts`: Include scripts section in summary
+- `--include-deps`: Include dependencies/devDependencies in summary
+- `--nested`: Output routes in nested hierarchical structure
+- `--include-empty-segments`: Include empty path segments in nested structure
+- `--exclude-fields <fields>`: Comma-separated list of fields to exclude
+- `--metadata <file>`: Path to metadata file (JSON or TOML) with titles and descriptions
+- `-w, --watch`: Watch mode: continuously monitor for file changes
+
+### merge
+```bash
+next-introspect merge <jsonFile> <metadataFile> [options]
+```
+
+**Options:**
+- `-o, --output <file>`: Write merged output to file instead of console
+- `-f, --format <format>`: Output format for merged result
+- `--indent <number>`: JSON indentation (default: 2)
+- `--exclude-fields <fields>`: Comma-separated list of fields to exclude
+
+## Examples
+
+### Development Workflow
+```bash
+# Watch for changes during development
+next-introspect introspect . --watch --format typescript --output src/routes.ts
+```
+
+### Documentation Generation
+```bash
+# Auto-update route documentation
+next-introspect introspect . --watch --format markdown --output docs/ROUTES.md
+```
+
+### CI/CD Integration
+```bash
+# Monitor route changes in deployment pipeline
+next-introspect introspect . --watch --quiet --output routes.json
+```
+
+### Advanced Analysis
+```bash
+# Full analysis with all options
+next-introspect introspect /path/to/project \
+  --format markdown \
+  --mode comprehensive \
+  --path-style relative-to-project \
+  --show-file-paths \
+  --package-summary \
+  --include-scripts \
+  --include-deps \
+  --nested \
+  --metadata metadata.json \
+  --output project-routes.md
+```

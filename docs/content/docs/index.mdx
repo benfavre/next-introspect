@@ -1,12 +1,12 @@
 ---
-title: Next Introspect
-description: Comprehensive Next.js project introspection tool that analyzes routing structures and generates detailed metadata
+title: Next.js Introspect
+description: A comprehensive Next.js project introspection tool that analyzes routing structures, detects framework configurations, and provides detailed metadata about your Next.js application.
 ---
+
+# Next.js Introspect
 
 [![npm version](https://badge.fury.io/js/next-introspect.svg)](https://badge.fury.io/js/next-introspect)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Node.js Version](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen)](https://nodejs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 
 A comprehensive Next.js project introspection tool that analyzes routing structures, detects framework configurations, and provides detailed metadata about your Next.js application.
 
@@ -20,8 +20,19 @@ bun add -g next-introspect
 ```
 
 **Analyze your Next.js project:**
+
+*Using global installation:*
 ```bash
 next-introspect introspect . --format typescript --output routes.ts
+```
+
+*Or run without global installation:*
+```bash
+# Using bunx
+bunx next-introspect introspect . --format typescript --output routes.ts
+
+# Using npx
+npx next-introspect introspect . --format typescript --output routes.ts
 ```
 
 **Use in your code:**
@@ -42,10 +53,19 @@ const postUrl = routes.blog.posts.byId({ id: "123" });
 - **Pages Router Support**: Complete analysis of traditional Pages Router with API routes and data fetching
 - **Configuration Parsing**: Extracts Next.js configuration and project metadata
 - **CLI Tool**: Command-line interface for quick analysis and file export
+- **Watch Mode**: Continuously monitor for file changes and auto-re-analyze
 - **TypeScript**: Full TypeScript support with comprehensive type definitions
-- **Watch Mode**: Continuously monitors your project for changes and automatically re-analyzes when routes are modified
 
-## 📖 Installation
+## 📚 Documentation
+
+<Cards>
+  <Card title="CLI Usage" href="/docs/cli-usage" description="Learn how to use the command-line interface" />
+  <Card title="Programmatic API" href="/docs/api-usage" description="Use next-introspect in your code" />
+  <Card title="Output Formats" href="/docs/output-formats" description="Explore different output formats" />
+  <Card title="Configuration" href="/docs/configuration" description="Customize analysis options" />
+</Cards>
+
+## 🛠️ Installation
 
 ### Global Installation (CLI)
 

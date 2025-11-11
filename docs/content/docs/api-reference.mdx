@@ -1,0 +1,849 @@
+---
+title: API Reference
+description: Complete API reference for the next-introspect programmatic interface
+---
+
+# API Reference
+
+This section provides a complete reference for the next-introspect programmatic API.
+
+## NextIntrospect Class
+
+The main class for analyzing Next.js projects.
+
+### Constructor
+
+```typescript
+new NextIntrospect(projectPath: string, options?: IntrospectionOptions)
+```
+
+**Parameters:**
+- `projectPath`: Path to the Next.js project root
+- `options`: Optional configuration object
+
+### Methods
+
+#### analyze()
+
+Analyzes the Next.js project and returns project information.
+
+```typescript
+async analyze(): Promise<ProjectInfo>
+```
+
+**Returns:** Promise resolving to `ProjectInfo` object
+
+**Throws:** Error if project is invalid or analysis fails
+
+#### getRoutes()
+
+Returns all detected routes.
+
+```typescript
+getRoutes(): RouteInfo[]
+```
+
+**Returns:** Array of `RouteInfo` objects
+
+**Requires:** Call `analyze()` first
+
+#### getResult()
+
+Returns the complete introspection result.
+
+```typescript
+getResult(): IntrospectionResult
+```
+
+**Returns:** Complete introspection result object
+
+**Requires:** Call `analyze()` first
+
+#### exportToObject()
+
+Alias for `getResult()`.
+
+```typescript
+exportToObject(): IntrospectionResult
+```
+
+#### format()
+
+Formats the results using the specified formatter.
+
+```typescript
+format(format: OutputFormat): string | object
+```
+
+**Parameters:**
+- `format`: Output format (`'object' | 'json' | 'markdown' | 'typescript'`)
+
+**Returns:** Formatted result as string or object
+
+#### exportToFile()
+
+Exports results to a file.
+
+```typescript
+async exportToFile(filePath: string, format?: OutputFormat): Promise<void>
+```
+
+**Parameters:**
+- `filePath`: Path to output file
+- `format`: Output format (default: `'json'`)
+
+#### setMode()
+
+Sets the analysis mode.
+
+```typescript
+setMode(mode: OutputMode): void
+```
+
+**Parameters:**
+- `mode`: Analysis mode (`'basic' | 'detailed' | 'comprehensive'`)
+
+#### getMode()
+
+Returns the current analysis mode.
+
+```typescript
+getMode(): OutputMode
+```
+
+#### updateOptions()
+
+Updates analysis options.
+
+```typescript
+updateOptions(newOptions: Partial<IntrospectionOptions>): void
+```
+
+**Parameters:**
+- `newOptions`: Partial options object to merge
+
+#### getRoutesByRouter()
+
+Gets routes filtered by router type.
+
+```typescript
+getRoutesByRouter(router: 'app' | 'pages'): RouteInfo[]
+```
+
+#### getApiRoutes()
+
+Gets all API routes (Pages Router only).
+
+```typescript
+getApiRoutes(): RouteInfo[]
+```
+
+#### getSpecialPages()
+
+Gets special pages (Pages Router only).
+
+```typescript
+getSpecialPages(): RouteInfo[]
+```
+
+#### getDynamicRoutes()
+
+Gets all dynamic routes.
+
+```typescript
+getDynamicRoutes(): RouteInfo[]
+```
+
+#### getStaticRoutes()
+
+Gets all static routes.
+
+```typescript
+getStaticRoutes(): RouteInfo[]
+```
+
+#### mergeWithJson()
+
+Merges existing JSON results with new metadata.
+
+```typescript
+async mergeWithJson(jsonFilePath: string, metadata: Record<string, RouteMetadata> | IntrospectionResult): Promise<IntrospectionResult>
+```
+
+#### reanalyze()
+
+Re-analyzes the project (useful when files have changed).
+
+```typescript
+async reanalyze(): Promise<ProjectInfo>
+```
+
+#### isAnalyzed()
+
+Checks if the project has been analyzed.
+
+```typescript
+isAnalyzed(): boolean
+```
+
+#### getProjectInfo()
+
+Returns project information.
+
+```typescript
+getProjectInfo(): ProjectInfo | null
+```
+
+#### getOptions()
+
+Returns current analysis options.
+
+```typescript
+getOptions(): IntrospectionOptions
+```
+
+## Type Definitions
+
+### IntrospectionOptions
+
+Configuration options for analysis.
+
+```typescript
+interface IntrospectionOptions {
+  /** Detail level of analysis */
+  mode?: OutputMode;
+
+  /** File patterns to include in analysis */
+  include?: string[];
+
+  /** File patterns to exclude from analysis */
+  exclude?: string[];
+
+  /** Maximum depth for directory traversal */
+  maxDepth?: number;
+
+  /** Custom ignore patterns */
+  ignorePatterns?: string[];
+
+  /** Whether to follow symbolic links */
+  followSymlinks?: boolean;
+
+  /** Path display options */
+  pathDisplay?: {
+    /** Path display style */
+    style?: 'absolute' | 'relative-to-project' | 'relative-to-app' | 'relative-to-pages' | 'strip-prefix';
+
+    /** Prefix to strip when using strip-prefix style */
+    stripPrefix?: string;
+
+    /** Whether to show file paths */
+    showFilePaths?: boolean;
+  };
+
+  /** Package.json display options */
+  packageDisplay?: {
+    /** Include full package.json details */
+    includeFullDetails?: boolean;
+
+    /** Include scripts section */
+    includeScripts?: boolean;
+
+    /** Include dependencies */
+    includeDependencies?: boolean;
+  };
+
+  /** Output formatting options */
+  outputFormat?: {
+    /** Output routes in nested structure */
+    nested?: boolean;
+
+    /** Include empty segments in nested structure */
+    includeEmptySegments?: boolean;
+
+    /** Fields to exclude from output */
+    excludeFields?: string[];
+
+    /** Prefixes to strip from route paths */
+    stripPrefixes?: string[];
+  };
+
+  /** Metadata options */
+  metadata?: {
+    /** Path to metadata file */
+    file?: string;
+
+    /** Metadata entries keyed by route path */
+    entries?: Record<string, RouteMetadata>;
+  };
+}
+```
+
+### ProjectInfo
+
+Information about the analyzed project.
+
+```typescript
+interface ProjectInfo {
+  /** Framework name */
+  framework: string;
+
+  /** Framework version */
+  version: string;
+
+  /** Router type(s) detected */
+  router: RouterType;
+
+  /** Project root directory */
+  rootDir: string;
+
+  /** Next.js configuration */
+  config?: NextConfig;
+
+  /** Package.json information */
+  packageInfo?: PackageInfo;
+
+  /** Detected source directories */
+  sourceDirs: {
+    app?: string;
+    pages?: string;
+    api?: string;
+  };
+}
+```
+
+### RouteInfo
+
+Information about a single route.
+
+```typescript
+interface RouteInfo extends BaseRoute {
+  /** Router type this route belongs to */
+  router: 'app' | 'pages';
+
+  /** App Router specific data */
+  appRouter?: Omit<AppRouterRoute, keyof BaseRoute>;
+
+  /** Pages Router specific data */
+  pagesRouter?: Omit<PagesRouterRoute, keyof BaseRoute>;
+
+  /** Metadata from external file */
+  metadata?: RouteMetadata;
+}
+```
+
+### BaseRoute
+
+Common route information.
+
+```typescript
+interface BaseRoute {
+  /** Route path (URL path) */
+  path: string;
+
+  /** File system path to the route file */
+  filePath: string;
+
+  /** Route pattern type */
+  pattern: RoutePattern;
+
+  /** Dynamic segments in the route */
+  dynamicSegments?: string[];
+
+  /** Catch-all segment */
+  catchAllSegment?: string;
+}
+```
+
+### AppRouterRoute
+
+App Router specific route information.
+
+```typescript
+interface AppRouterRoute extends BaseRoute {
+  /** Route segment name */
+  segment: string;
+
+  /** Whether this is a route group */
+  isRouteGroup: boolean;
+
+  /** Whether this is an intercepting route */
+  isInterceptingRoute: boolean;
+
+  /** Whether this is a parallel route */
+  isParallelRoute: boolean;
+
+  /** Special files present */
+  specialFiles: {
+    page?: boolean;
+    layout?: boolean;
+    loading?: boolean;
+    error?: boolean;
+    notFound?: boolean;
+    template?: boolean;
+    default?: boolean;
+    route?: boolean;
+  };
+
+  /** Component types for special files */
+  componentTypes: {
+    page?: ComponentType;
+    layout?: ComponentType;
+    loading?: ComponentType;
+    error?: ComponentType;
+    notFound?: ComponentType;
+    template?: ComponentType;
+    default?: ComponentType;
+  };
+
+  /** Exported functions and metadata */
+  exports?: {
+    metadata?: boolean;
+    generateMetadata?: boolean;
+    generateStaticParams?: boolean;
+    generateViewport?: boolean;
+    revalidate?: number;
+  };
+
+  /** Child routes */
+  children?: AppRouterRoute[];
+}
+```
+
+### PagesRouterRoute
+
+Pages Router specific route information.
+
+```typescript
+interface PagesRouterRoute extends BaseRoute {
+  /** Whether this is an API route */
+  isApiRoute: boolean;
+
+  /** Data fetching methods */
+  dataFetching?: {
+    getStaticProps?: boolean;
+    getServerSideProps?: boolean;
+    getStaticPaths?: boolean;
+  };
+
+  /** Whether it's a special Next.js page */
+  isSpecialPage?: boolean;
+
+  /** Special page type */
+  specialPageType?: 'app' | 'document' | 'error' | '404' | '500';
+
+  /** Component type */
+  componentType?: ComponentType;
+}
+```
+
+### RouteMetadata
+
+Metadata for routes.
+
+```typescript
+interface RouteMetadata {
+  /** Human-readable title */
+  title?: string;
+
+  /** Description of the route's purpose */
+  description?: string;
+
+  /** Additional custom metadata */
+  [key: string]: any;
+}
+```
+
+### IntrospectionResult
+
+Complete analysis result.
+
+```typescript
+interface IntrospectionResult {
+  /** Project information */
+  project: ProjectInfo;
+
+  /** All detected routes */
+  routes: RouteInfo[] | Record<string, any>;
+
+  /** Analysis metadata */
+  metadata: {
+    /** Analysis timestamp */
+    analyzedAt: Date;
+
+    /** Analysis duration in milliseconds */
+    duration: number;
+
+    /** Total files processed */
+    filesProcessed: number;
+
+    /** Analysis mode used */
+    mode: OutputMode;
+
+    /** Merge timestamp (for merged results) */
+    mergedAt?: Date;
+
+    /** Source file for merged results */
+    mergeSource?: string;
+  };
+}
+```
+
+## Enums and Constants
+
+### OutputFormat
+
+```typescript
+type OutputFormat = 'object' | 'json' | 'markdown' | 'typescript';
+```
+
+### OutputMode
+
+```typescript
+type OutputMode = 'basic' | 'detailed' | 'comprehensive';
+```
+
+### RouterType
+
+```typescript
+type RouterType = 'app' | 'pages' | 'both';
+```
+
+### ComponentType
+
+```typescript
+type ComponentType = 'server' | 'client' | 'unknown';
+```
+
+### RoutePattern
+
+```typescript
+type RoutePattern = 'static' | 'dynamic' | 'catch-all' | 'optional-catch-all';
+```
+
+## Utility Functions
+
+### isNextJsProject()
+
+Checks if a directory is a Next.js project.
+
+```typescript
+function isNextJsProject(projectPath: string): Promise<boolean>
+```
+
+### detectRouterType()
+
+Detects the router type used in a Next.js project.
+
+```typescript
+function detectRouterType(projectPath: string): Promise<RouterType>
+```
+
+### parseRouteSegment()
+
+Parses a route segment string.
+
+```typescript
+function parseRouteSegment(segment: string): RouteSegment
+```
+
+### formatRoutePath()
+
+Formats a route path for display.
+
+```typescript
+function formatRoutePath(path: string, style?: string, baseDir?: string): string
+```
+
+### detectComponentType()
+
+Detects if a component is server or client.
+
+```typescript
+function detectComponentType(filePath: string): Promise<ComponentType>
+```
+
+### routesToNested()
+
+Converts flat routes array to nested structure.
+
+```typescript
+function routesToNested(routes: RouteInfo[], includeEmptySegments?: boolean): Record<string, any>
+```
+
+### routesToArray()
+
+Converts nested routes back to flat array.
+
+```typescript
+function routesToArray(nestedRoutes: Record<string, any>): RouteInfo[]
+```
+
+### parseMetadataFile()
+
+Parses metadata from JSON or TOML file.
+
+```typescript
+function parseMetadataFile(filePath: string): Promise<Record<string, RouteMetadata>>
+```
+
+### mergeRouteMetadata()
+
+Merges metadata into routes.
+
+```typescript
+function mergeRouteMetadata(routes: RouteInfo[], metadata: Record<string, RouteMetadata>): RouteInfo[]
+```
+
+### filterExcludedFields()
+
+Filters out specified fields from result object.
+
+```typescript
+function filterExcludedFields(result: IntrospectionResult, excludeFields: string[]): IntrospectionResult
+```
+
+### formatPathForDisplay()
+
+Formats file paths according to display options.
+
+```typescript
+function formatPathForDisplay(
+  filePath: string,
+  projectRoot: string,
+  sourceDirs: Record<string, string>,
+  pathDisplay: any
+): string
+```
+
+## Adapters
+
+### BaseAdapter
+
+Base class for framework adapters.
+
+```typescript
+abstract class BaseAdapter {
+  abstract name: string;
+  abstract detect(projectPath: string): Promise<boolean>;
+  abstract getProjectInfo(projectPath: string): Promise<ProjectInfo>;
+  abstract getRoutes(projectPath: string, mode: OutputMode): Promise<RouteInfo[]>;
+}
+```
+
+### NextJsAdapter
+
+Next.js specific adapter implementation.
+
+```typescript
+class NextJsAdapter extends BaseAdapter {
+  name = 'nextjs';
+  detect(projectPath: string): Promise<boolean>;
+  getProjectInfo(projectPath: string, packageDisplay?: any): Promise<ProjectInfo>;
+  getRoutes(projectPath: string, mode: OutputMode): Promise<RouteInfo[]>;
+}
+```
+
+## Parsers
+
+### AppRouterParser
+
+Parses App Router routes.
+
+```typescript
+class AppRouterParser {
+  constructor(config: ParserConfig);
+  parse(): Promise<AppRouterRoute[]>;
+  parseRouteFile(filePath: string): Promise<AppRouterRoute>;
+  getSpecialFiles(dirPath: string): Promise<Record<string, boolean>>;
+  detectComponentType(filePath: string): Promise<ComponentType>;
+}
+```
+
+### PagesRouterParser
+
+Parses Pages Router routes.
+
+```typescript
+class PagesRouterParser {
+  constructor(config: ParserConfig);
+  parse(): Promise<PagesRouterRoute[]>;
+  parseRouteFile(filePath: string): Promise<PagesRouterRoute>;
+  detectApiRoute(filePath: string): Promise<boolean>;
+  getDataFetchingMethods(filePath: string): Promise<Record<string, boolean>>;
+}
+```
+
+### ConfigParser
+
+Parses Next.js configuration.
+
+```typescript
+class ConfigParser {
+  static parseConfig(projectPath: string): Promise<NextConfig>;
+  static parsePackageJson(projectPath: string): Promise<PackageInfo>;
+  static detectRouterType(projectPath: string): Promise<RouterType>;
+}
+```
+
+## Formatters
+
+### Base Formatter Interface
+
+```typescript
+interface Formatter {
+  format(result: IntrospectionResult): string | object;
+  getFormatType(): OutputFormat;
+}
+```
+
+### ObjectFormatter
+
+Returns raw JavaScript objects.
+
+```typescript
+class ObjectFormatter implements Formatter {
+  format(result: IntrospectionResult): object;
+  getFormatType(): OutputFormat;
+}
+```
+
+### JsonFormatter
+
+Formats results as JSON.
+
+```typescript
+class JsonFormatter implements Formatter {
+  constructor(options?: { indent?: number });
+  format(result: IntrospectionResult): string;
+  getFormatType(): OutputFormat;
+}
+```
+
+### MarkdownFormatter
+
+Formats results as Markdown documentation.
+
+```typescript
+class MarkdownFormatter implements Formatter {
+  format(result: IntrospectionResult): string;
+  getFormatType(): OutputFormat;
+  private formatRoute(route: RouteInfo): string;
+  private formatProjectInfo(project: ProjectInfo): string;
+}
+```
+
+### TypeScriptFormatter
+
+Generates TypeScript type definitions and route helpers.
+
+```typescript
+class TypeScriptFormatter implements Formatter {
+  constructor(options?: { stripPrefixes?: string[] });
+  format(result: IntrospectionResult): string;
+  getFormatType(): OutputFormat;
+  private generateRouteTypes(routes: RouteInfo[]): string;
+  private generateRouteHelpers(routes: RouteInfo[]): string;
+}
+```
+
+## Error Types
+
+next-introspect throws specific error types for different failure scenarios.
+
+### InvalidProjectError
+
+Thrown when the specified path is not a valid Next.js project.
+
+```typescript
+class InvalidProjectError extends Error {
+  constructor(projectPath: string);
+}
+```
+
+### AnalysisError
+
+Thrown when analysis fails.
+
+```typescript
+class AnalysisError extends Error {
+  constructor(message: string, cause?: Error);
+}
+```
+
+### FormatterError
+
+Thrown when formatting fails.
+
+```typescript
+class FormatterError extends Error {
+  constructor(format: OutputFormat, cause?: Error);
+}
+```
+
+## Constants
+
+### DEFAULT_OPTIONS
+
+Default introspection options.
+
+```typescript
+const DEFAULT_OPTIONS: IntrospectionOptions = {
+  mode: 'comprehensive',
+  maxDepth: 10,
+  followSymlinks: false
+};
+```
+
+### SUPPORTED_FORMATS
+
+Supported output formats.
+
+```typescript
+const SUPPORTED_FORMATS: OutputFormat[] = [
+  'object',
+  'json',
+  'markdown',
+  'typescript'
+];
+```
+
+### SUPPORTED_MODES
+
+Supported analysis modes.
+
+```typescript
+const SUPPORTED_MODES: OutputMode[] = [
+  'basic',
+  'detailed',
+  'comprehensive'
+];
+```
+
+## Migration Guide
+
+### From v0.2.x to v0.3.x
+
+**Breaking Changes:**
+- `Introspect` class renamed to `NextIntrospect`
+- `getAllRoutes()` renamed to `getRoutes()`
+- `export()` renamed to `format()`
+- Configuration structure updated
+
+**Migration:**
+```typescript
+// Before
+import { Introspect } from 'next-introspect';
+const introspect = new Introspect('./', { mode: 'detailed' });
+await introspect.analyze();
+const routes = introspect.getAllRoutes();
+const output = introspect.export('json');
+
+// After
+import { NextIntrospect } from 'next-introspect';
+const introspect = new NextIntrospect('./', { mode: 'detailed' });
+await introspect.analyze();
+const routes = introspect.getRoutes();
+const output = introspect.format('json');
+```
+
+For more detailed migration information, see the [changelog](https://github.com/benfavre/next-introspect/blob/main/CHANGELOG.md).

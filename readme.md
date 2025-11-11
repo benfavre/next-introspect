@@ -42,6 +42,7 @@ const postUrl = routes.blog.posts.byId({ id: "123" });
 - **Pages Router Support**: Complete analysis of traditional Pages Router with API routes and data fetching
 - **Configuration Parsing**: Extracts Next.js configuration and project metadata
 - **CLI Tool**: Command-line interface for quick analysis and file export
+- **Watch Mode**: Continuously monitor for file changes and auto-re-analyze
 - **TypeScript**: Full TypeScript support with comprehensive type definitions
 
 ## 🚀 Installation

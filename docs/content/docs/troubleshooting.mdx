@@ -1,0 +1,638 @@
+---
+title: Troubleshooting
+description: Common issues and solutions when using next-introspect
+---
+
+# Troubleshooting
+
+This guide helps you resolve common issues and problems when using next-introspect.
+
+## Installation Issues
+
+### Command Not Found
+
+**Problem:** `next-introspect: command not found`
+
+**Solutions:**
+
+1. **Global Installation Check:**
+   ```bash
+   # Install globally
+   npm install -g next-introspect
+   # or
+   bun add -g next-introspect
+
+   # Check if installed
+   which next-introspect
+   next-introspect --version
+   ```
+
+2. **PATH Issues:**
+   - On macOS/Linux, check if npm global bin directory is in PATH
+   - On Windows, restart terminal or VS Code
+   - Try using `npx next-introspect` instead
+
+3. **Permission Issues:**
+   ```bash
+   # Try with sudo (not recommended)
+   sudo npm install -g next-introspect
+
+   # Or use a version manager
+   bun add -g next-introspect
+   ```
+
+### Module Not Found (Local Installation)
+
+**Problem:** `Cannot find module 'next-introspect'`
+
+**Solutions:**
+
+1. **Install Locally:**
+   ```bash
+   npm install next-introspect
+   # or
+   bun add next-introspect
+   ```
+
+2. **Use npx:**
+   ```bash
+   npx next-introspect introspect .
+   ```
+
+3. **Check package.json:**
+   ```json
+   {
+     "devDependencies": {
+       "next-introspect": "^0.3.16"
+     }
+   }
+   ```
+
+## Analysis Errors
+
+### Invalid Next.js Project
+
+**Problem:** `Error: Invalid Next.js project: /path/to/project`
+
+**Solutions:**
+
+1. **Check Project Structure:**
+   - Ensure `package.json` exists with Next.js dependency
+   - Check for `app/` directory (App Router) or `pages/` directory (Pages Router)
+   - Verify Next.js is listed in dependencies
+
+2. **Correct Package.json:**
+   ```json
+   {
+     "dependencies": {
+       "next": "^14.0.0"
+     }
+   }
+   ```
+
+3. **Framework Detection:**
+   ```bash
+   # Check if Next.js is detected
+   ls -la package.json
+   grep -i next package.json
+   ```
+
+### No Routes Found
+
+**Problem:** Analysis completes but no routes are found
+
+**Solutions:**
+
+1. **Check Directory Structure:**
+   ```bash
+   # App Router
+   ls -la app/
+   ls -la app/**/
+
+   # Pages Router
+   ls -la pages/
+   ls -la pages/**/
+   ```
+
+2. **File Extensions:**
+   - Ensure files have correct extensions: `.js`, `.jsx`, `.ts`, `.tsx`
+   - Check for TypeScript configuration if using `.ts`/`.tsx`
+
+3. **Special Files:**
+   - App Router: Check for `page.tsx`, `layout.tsx`, `route.ts`
+   - Pages Router: Check for page files and API routes
+
+### Permission Errors
+
+**Problem:** `EACCES: permission denied` or `EPERM: operation not permitted`
+
+**Solutions:**
+
+1. **File Permissions:**
+   ```bash
+   # Check permissions
+   ls -la /path/to/project
+
+   # Fix permissions
+   chmod -R 755 /path/to/project
+   ```
+
+2. **Run as Administrator:**
+   ```bash
+   # On macOS/Linux
+   sudo next-introspect introspect .
+
+   # On Windows (PowerShell as Admin)
+   next-introspect introspect .
+   ```
+
+3. **Node Modules:**
+   ```bash
+   # Clear and reinstall
+   rm -rf node_modules package-lock.json
+   npm install
+   ```
+
+## Output Issues
+
+### File Not Written
+
+**Problem:** Analysis runs but output file is not created
+
+**Solutions:**
+
+1. **Directory Permissions:**
+   ```bash
+   # Check write permissions
+   touch test-output.json && rm test-output.json
+
+   # Create directory if needed
+   mkdir -p output/dir/
+   ```
+
+2. **Relative Paths:**
+   ```bash
+   # Use absolute paths
+   next-introspect introspect . --output /full/path/to/output.json
+
+   # Or ensure current directory is writable
+   pwd && ls -la
+   ```
+
+3. **File Locks:**
+   - Close any applications that might have the file open
+   - Wait a moment if another process is writing to the file
+
+### Invalid JSON Output
+
+**Problem:** JSON output is malformed or unreadable
+
+**Solutions:**
+
+1. **Pretty Print:**
+   ```bash
+   next-introspect introspect . --format json --indent 2 --output routes.json
+   ```
+
+2. **Validate JSON:**
+   ```bash
+   # Check if valid JSON
+   cat routes.json | jq . > /dev/null && echo "Valid JSON" || echo "Invalid JSON"
+   ```
+
+3. **Large Files:**
+   - Use `--indent 0` for compact JSON
+   - Split analysis if project is very large
+
+### TypeScript Compilation Errors
+
+**Problem:** Generated TypeScript file has compilation errors
+
+**Solutions:**
+
+1. **Type Imports:**
+   ```typescript
+   // Ensure proper imports in generated file
+   import type { RouteBuilder } from 'next-introspect';
+   ```
+
+2. **Type Conflicts:**
+   - Check for conflicting type definitions
+   - Use namespace imports to avoid conflicts
+
+3. **Strip Prefixes:**
+   ```bash
+   # Use strip-prefixes to avoid path issues
+   next-introspect introspect . --format typescript --strip-prefixes "/api/" "/_next/"
+   ```
+
+## Watch Mode Issues
+
+### Watch Not Detecting Changes
+
+**Problem:** Watch mode doesn't react to file changes
+
+**Solutions:**
+
+1. **File Types:**
+   - Watch mode only monitors specific file types
+   - Ensure changes are to `.js`, `.jsx`, `.ts`, `.tsx`, or `.json` files
+
+2. **Ignored Directories:**
+   - Changes in `node_modules/`, `.next/`, `.git/` are ignored
+   - Move files outside ignored directories
+
+3. **Debounce Timing:**
+   - Wait at least 300ms between changes
+   - Large projects may need longer debounce
+
+### Watch Process Won't Stop
+
+**Problem:** `Ctrl+C` doesn't stop watch mode
+
+**Solutions:**
+
+1. **Force Kill:**
+   ```bash
+   # Find process
+   ps aux | grep next-introspect
+
+   # Kill process
+   kill -9 <PID>
+   ```
+
+2. **Port Conflicts:**
+   - Check if another process is using the same resources
+   - Restart terminal
+
+### High CPU Usage in Watch Mode
+
+**Problem:** Watch mode consumes excessive CPU
+
+**Solutions:**
+
+1. **Reduce Analysis Depth:**
+   ```bash
+   next-introspect introspect . --watch --mode basic
+   ```
+
+2. **Exclude Unnecessary Files:**
+   ```bash
+   next-introspect introspect . --watch --exclude-fields "componentTypes,exports"
+   ```
+
+3. **Increase Debounce:**
+   - Currently fixed at 300ms
+   - Consider using file system events instead
+
+## Configuration Issues
+
+### Metadata File Not Found
+
+**Problem:** `--metadata file.json` shows warning about missing file
+
+**Solutions:**
+
+1. **File Path:**
+   ```bash
+   # Check file exists
+   ls -la metadata.json
+
+   # Use absolute path
+   next-introspect introspect . --metadata /full/path/to/metadata.json
+   ```
+
+2. **File Format:**
+   ```json
+   {
+     "/route/path": {
+       "title": "Route Title",
+       "description": "Route description"
+     }
+   }
+   ```
+
+3. **TOML Support:**
+   - TOML support is limited
+   - Use JSON format for best compatibility
+
+### Invalid Configuration Options
+
+**Problem:** `Error: Invalid [option] '[value]'`
+
+**Solutions:**
+
+1. **Check Valid Values:**
+   - `--mode`: `basic`, `detailed`, `comprehensive`
+   - `--format`: `object`, `json`, `markdown`, `typescript`
+   - `--path-style`: `absolute`, `relative-to-project`, `relative-to-app`, `relative-to-pages`, `strip-prefix`
+
+2. **Case Sensitivity:**
+   - All option values are case-sensitive
+   - Use exact values as shown in help
+
+### Path Style Issues
+
+**Problem:** Path formatting doesn't work as expected
+
+**Solutions:**
+
+1. **App/Pages Directories:**
+   ```bash
+   # Ensure correct directories exist
+   ls -la app/ pages/
+   ```
+
+2. **Strip Prefix:**
+   ```bash
+   # Verify prefix exists in paths
+   next-introspect introspect . --format json | grep "filePath"
+   ```
+
+3. **Show File Paths:**
+   ```bash
+   # Add --show-file-paths to see file path formatting
+   next-introspect introspect . --path-style relative-to-project --show-file-paths
+   ```
+
+## Performance Issues
+
+### Slow Analysis
+
+**Problem:** Analysis takes too long
+
+**Solutions:**
+
+1. **Use Basic Mode:**
+   ```bash
+   next-introspect introspect . --mode basic
+   ```
+
+2. **Exclude Fields:**
+   ```bash
+   next-introspect introspect . --exclude-fields "componentTypes,exports,dataFetching"
+   ```
+
+3. **Limit Depth:**
+   - Currently analyzes entire project
+   - Consider analyzing specific directories
+
+### Memory Issues
+
+**Problem:** Out of memory errors
+
+**Solutions:**
+
+1. **Increase Memory:**
+   ```bash
+   NODE_OPTIONS="--max-old-space-size=4096" next-introspect introspect .
+   ```
+
+2. **Reduce Analysis:**
+   ```bash
+   next-introspect introspect . --mode basic --exclude-fields "exports,dataFetching"
+   ```
+
+3. **Split Analysis:**
+   - Analyze different parts of the project separately
+   - Use programmatic API for custom analysis
+
+### Large Output Files
+
+**Problem:** Generated files are too large
+
+**Solutions:**
+
+1. **Field Exclusion:**
+   ```bash
+   next-introspect introspect . --exclude-fields "filePath,componentTypes,exports"
+   ```
+
+2. **Compact JSON:**
+   ```bash
+   next-introspect introspect . --format json --indent 0
+   ```
+
+3. **Split Output:**
+   - Generate separate files for different route types
+   - Use programmatic API to filter results
+
+## Framework-Specific Issues
+
+### App Router Issues
+
+**Problem:** App Router routes not detected correctly
+
+**Solutions:**
+
+1. **File Structure:**
+   ```
+   app/
+   ├── layout.tsx
+   ├── page.tsx
+   ├── blog/
+   │   ├── page.tsx
+   │   └── [slug]/
+   │       └── page.tsx
+   └── api/
+       └── users/
+           └── route.ts
+   ```
+
+2. **Special Files:**
+   - Ensure correct file names: `page.tsx`, `layout.tsx`, `route.ts`
+   - Check for TypeScript configuration
+
+3. **Route Groups:**
+   ```bash
+   # Route groups should be in parentheses
+   ls -la app/(group)/
+   ```
+
+### Pages Router Issues
+
+**Problem:** Pages Router routes not detected
+
+**Solutions:**
+
+1. **Directory Structure:**
+   ```
+   pages/
+   ├── index.tsx
+   ├── about.tsx
+   ├── blog/
+   │   ├── index.tsx
+   │   └── [slug].tsx
+   └── api/
+       └── users.ts
+   ```
+
+2. **API Routes:**
+   - API routes should export HTTP method handlers
+   - Check file exports
+
+3. **Special Pages:**
+   - `_app.tsx`, `_document.tsx`, `_error.tsx` are detected as special pages
+
+### Mixed Router Issues
+
+**Problem:** Both App and Pages routers detected but causing conflicts
+
+**Solutions:**
+
+1. **Choose Primary Router:**
+   ```bash
+   # Analysis works with both, but focus on one
+   next-introspect introspect . --format json | jq '.project.router'
+   ```
+
+2. **Separate Analysis:**
+   - Analyze App Router routes: filter by `router === "app"`
+   - Analyze Pages Router routes: filter by `router === "pages"`
+
+## Integration Issues
+
+### Build Tool Integration
+
+**Problem:** next-introspect doesn't work in build scripts
+
+**Solutions:**
+
+1. **Script Timing:**
+   ```json
+   {
+     "scripts": {
+       "build": "next-introspect introspect . && next build"
+     }
+   }
+   ```
+
+2. **Error Handling:**
+   ```json
+   {
+     "scripts": {
+       "build": "next-introspect introspect . || echo 'Route analysis failed' && next build"
+     }
+   }
+   ```
+
+3. **Conditional Execution:**
+   ```json
+   {
+     "scripts": {
+       "build": "if [ \"$CI\" != \"true\" ]; then next-introspect introspect .; fi && next build"
+     }
+   }
+   ```
+
+### CI/CD Issues
+
+**Problem:** next-introspect fails in CI environment
+
+**Solutions:**
+
+1. **Dependencies:**
+   ```yaml
+   - name: Install next-introspect
+     run: npm install -g next-introspect
+   ```
+
+2. **Permissions:**
+   ```yaml
+   - name: Analyze routes
+     run: next-introspect introspect . --output routes.json
+   ```
+
+3. **Caching:**
+   ```yaml
+   - name: Cache node modules
+     uses: actions/cache@v3
+     with:
+       path: ~/.npm
+       key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+   ```
+
+## Debug Mode
+
+### Verbose Output
+
+```bash
+# Enable verbose logging (if available)
+DEBUG=* next-introspect introspect .
+
+# Check Node.js version
+node --version
+
+# Check npm version
+npm --version
+```
+
+### Manual Verification
+
+```bash
+# Check project structure
+find . -name "*.tsx" -o -name "*.ts" -o -name "*.jsx" -o -name "*.js" | head -20
+
+# Check package.json
+cat package.json | jq '.dependencies.next'
+
+# Test file access
+ls -la app/page.tsx
+ls -la pages/index.js
+```
+
+### Create Test Case
+
+```bash
+# Create minimal test project
+mkdir test-project
+cd test-project
+npm init -y
+npm install next react react-dom
+mkdir app
+echo 'export default function Home() { return <h1>Hello</h1>; }' > app/page.tsx
+echo '{"scripts": {"dev": "next dev"}}' > package.json
+
+# Test next-introspect
+next-introspect introspect .
+```
+
+## Getting Help
+
+### Issue Reporting
+
+When reporting issues, please include:
+
+1. **Version Information:**
+   ```bash
+   next-introspect --version
+   node --version
+   npm --version
+   ```
+
+2. **Project Information:**
+   ```bash
+   ls -la package.json
+   grep -A5 -B5 '"next"' package.json
+   find . -name "app" -o -name "pages" | head -5
+   ```
+
+3. **Command and Error:**
+   ```bash
+   # Exact command that failed
+   next-introspect introspect . --format json
+   ```
+
+4. **Environment:**
+   - Operating system and version
+   - Shell being used
+   - Any relevant environment variables
+
+### Common Workarounds
+
+1. **Use Basic Mode:** For performance issues, start with `--mode basic`
+2. **Use Local Installation:** For permission issues, use `npx` or local installation
+3. **Simplify Configuration:** Remove advanced options to isolate problems
+4. **Check File Paths:** Ensure all paths are accessible and correct
+
+If you continue to have issues, please check the [GitHub repository](https://github.com/benfavre/next-introspect) for existing issues or create a new issue with detailed information.

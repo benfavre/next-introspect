@@ -1,0 +1,379 @@
+---
+title: Programmatic API
+description: Learn how to use next-introspect programmatically in your TypeScript/JavaScript applications
+---
+
+# Programmatic API
+
+Use next-introspect directly in your code for custom integrations, build tools, or automated workflows.
+
+## Basic Usage
+
+```typescript
+import { NextIntrospect } from 'next-introspect';
+
+// Create introspector instance
+const introspect = new NextIntrospect('/path/to/nextjs/project', {
+  mode: 'comprehensive'
+});
+
+// Analyze project
+const projectInfo = await introspect.analyze();
+
+// Get routes
+const routes = introspect.getRoutes();
+
+// Export results
+await introspect.exportToFile('routes.json', 'json');
+```
+
+## Configuration Options
+
+```typescript
+import { NextIntrospect } from 'next-introspect';
+
+const introspect = new NextIntrospect('./my-nextjs-app', {
+  // Analysis mode: 'basic' | 'detailed' | 'comprehensive'
+  mode: 'comprehensive',
+
+  // Path display options
+  pathDisplay: {
+    style: 'relative-to-project',
+    showFilePaths: true,
+    stripPrefix: 'src/'
+  },
+
+  // Package display options
+  packageDisplay: {
+    includeFullDetails: false,
+    includeScripts: true,
+    includeDependencies: true
+  },
+
+  // Output formatting
+  outputFormat: {
+    nested: true,
+    includeEmptySegments: false,
+    excludeFields: ['filePath', 'pattern'],
+    stripPrefixes: ['/api/', '/_next/']
+  },
+
+  // Metadata integration
+  metadata: {
+    file: './metadata.json'
+  }
+});
+```
+
+## Working with Results
+
+### Get All Routes
+
+```typescript
+const routes = introspect.getRoutes();
+
+routes.forEach(route => {
+  console.log(`Route: ${route.path}`);
+  console.log(`File: ${route.filePath}`);
+  console.log(`Router: ${route.router}`);
+  console.log(`Pattern: ${route.pattern}`);
+});
+```
+
+### Filter Routes by Type
+
+```typescript
+// Get all API routes (Pages Router only)
+const apiRoutes = introspect.getApiRoutes();
+
+// Get all dynamic routes
+const dynamicRoutes = introspect.getDynamicRoutes();
+
+// Get routes by router type
+const appRoutes = introspect.getRoutesByRouter('app');
+const pagesRoutes = introspect.getRoutesByRouter('pages');
+```
+
+### Export in Different Formats
+
+```typescript
+// Get results as object
+const results = introspect.getResult();
+
+// Format as JSON
+const jsonOutput = introspect.format('json');
+
+// Format as Markdown
+const markdownOutput = introspect.format('markdown');
+
+// Format as TypeScript
+const typescriptOutput = introspect.format('typescript');
+```
+
+## Advanced Usage
+
+### Merging Results
+
+```typescript
+// Merge existing JSON with new metadata
+const mergedResult = await introspect.mergeWithJson(
+  'existing-routes.json',
+  {
+    '/blog': { title: 'Blog', description: 'Company blog posts' },
+    '/about': { title: 'About Us', description: 'Learn about our company' }
+  }
+);
+```
+
+### Re-analysis
+
+```typescript
+// Initial analysis
+await introspect.analyze();
+
+// ... later, when files have changed
+await introspect.reanalyze();
+```
+
+### Custom Metadata Integration
+
+```typescript
+// Load custom metadata
+const metadata = {
+  '/products/[id]': {
+    title: 'Product Details',
+    description: 'View detailed product information',
+    customField: 'special handling required'
+  }
+};
+
+// Create introspector with metadata
+const introspect = new NextIntrospect('./', {
+  metadata: {
+    entries: metadata
+  }
+});
+```
+
+## TypeScript Integration
+
+### Type-Safe Route Access
+
+```typescript
+// Generate TypeScript definitions
+await introspect.exportToFile('routes.ts', 'typescript');
+
+// Use in your code
+import { routes } from './routes';
+
+// Type-safe route generation
+const productUrl = routes.products.byId({ id: '123' });
+const categoryUrl = routes.categories.bySlug({ slug: 'electronics' });
+const blogPostUrl = routes.blog.posts.byId({ id: '456', slug: 'my-post' });
+```
+
+### Type Definitions
+
+```typescript
+import type {
+  NextIntrospect,
+  IntrospectionOptions,
+  IntrospectionResult,
+  RouteInfo,
+  ProjectInfo,
+  OutputFormat,
+  OutputMode
+} from 'next-introspect';
+
+const options: IntrospectionOptions = {
+  mode: 'comprehensive',
+  pathDisplay: {
+    style: 'relative-to-project',
+    showFilePaths: true
+  }
+};
+
+const introspect: NextIntrospect = new NextIntrospect('./', options);
+```
+
+## Build Tool Integration
+
+### Webpack Plugin Example
+
+```javascript
+// next-introspect-webpack-plugin.js
+const { NextIntrospect } = require('next-introspect');
+
+class NextIntrospectWebpackPlugin {
+  constructor(options = {}) {
+    this.options = options;
+  }
+
+  apply(compiler) {
+    compiler.hooks.beforeCompile.tapPromise('NextIntrospectPlugin', async () => {
+      const introspect = new NextIntrospect(this.options.projectPath || './', {
+        mode: 'basic',
+        ...this.options
+      });
+
+      await introspect.analyze();
+      await introspect.exportToFile(this.options.output || 'routes.json', 'json');
+    });
+  }
+}
+
+module.exports = NextIntrospectWebpackPlugin;
+```
+
+### Vite Plugin Example
+
+```typescript
+// next-introspect-vite-plugin.ts
+import { NextIntrospect } from 'next-introspect';
+import type { Plugin } from 'vite';
+
+export function nextIntrospectPlugin(options: {
+  output?: string;
+  format?: 'json' | 'typescript';
+} = {}): Plugin {
+  let introspect: NextIntrospect;
+
+  return {
+    name: 'next-introspect',
+    buildStart() {
+      introspect = new NextIntrospect('./', { mode: 'comprehensive' });
+    },
+    buildEnd() {
+      // Generate route information after build
+      introspect.analyze().then(() => {
+        return introspect.exportToFile(
+          options.output || 'routes.json',
+          options.format || 'json'
+        );
+      });
+    }
+  };
+}
+```
+
+## CI/CD Integration
+
+### GitHub Actions Example
+
+```yaml
+# .github/workflows/routes-check.yml
+name: Route Analysis
+on:
+  push:
+    paths:
+      - 'app/**'
+      - 'pages/**'
+      - 'next.config.js'
+
+jobs:
+  analyze-routes:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: oven-sh/setup-bun@v1
+      - run: bun add next-introspect
+      - name: Analyze routes
+        run: bunx next-introspect introspect . --format json --output routes.json
+      - name: Upload routes artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: routes-analysis
+          path: routes.json
+```
+
+### Pre-commit Hook
+
+```bash
+#!/bin/bash
+# .git/hooks/pre-commit
+
+# Run route analysis before commit
+bunx next-introspect introspect . --format json --output routes.json
+
+# Add to staging if routes changed
+if git diff --quiet routes.json; then
+  echo "Routes unchanged"
+else
+  echo "Routes updated, adding to commit"
+  git add routes.json
+fi
+```
+
+## Error Handling
+
+```typescript
+try {
+  const introspect = new NextIntrospect(projectPath);
+  await introspect.analyze();
+  const routes = introspect.getRoutes();
+
+  // Process routes...
+} catch (error) {
+  if (error.message.includes('Invalid Next.js project')) {
+    console.error('The specified path is not a valid Next.js project');
+    console.error('Make sure it contains package.json with Next.js dependency');
+  } else {
+    console.error('Analysis failed:', error.message);
+  }
+  process.exit(1);
+}
+```
+
+## Performance Optimization
+
+### Incremental Analysis
+
+```typescript
+class CachedIntrospect {
+  private cache = new Map<string, { routes: RouteInfo[], timestamp: number }>();
+  private cacheTimeout = 5 * 60 * 1000; // 5 minutes
+
+  async getRoutes(projectPath: string): Promise<RouteInfo[]> {
+    const cached = this.cache.get(projectPath);
+    const now = Date.now();
+
+    if (cached && (now - cached.timestamp) < this.cacheTimeout) {
+      return cached.routes;
+    }
+
+    const introspect = new NextIntrospect(projectPath, { mode: 'basic' });
+    await introspect.analyze();
+    const routes = introspect.getRoutes();
+
+    this.cache.set(projectPath, { routes, timestamp: now });
+    return routes;
+  }
+}
+```
+
+### Parallel Processing
+
+```typescript
+async function analyzeMultipleProjects(projectPaths: string[]) {
+  const results = await Promise.allSettled(
+    projectPaths.map(async (path) => {
+      const introspect = new NextIntrospect(path, { mode: 'basic' });
+      await introspect.analyze();
+      return {
+        path,
+        routes: introspect.getRoutes(),
+        project: introspect.getProjectInfo()
+      };
+    })
+  );
+
+  // Handle results...
+  results.forEach((result, index) => {
+    if (result.status === 'fulfilled') {
+      console.log(`${projectPaths[index]}: ${result.value.routes.length} routes`);
+    } else {
+      console.error(`${projectPaths[index]}: ${result.reason.message}`);
+    }
+  });
+}
+```

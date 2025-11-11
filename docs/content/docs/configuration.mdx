@@ -1,0 +1,466 @@
+---
+title: Configuration
+description: Learn how to configure next-introspect for different analysis modes and output customization
+---
+
+# Configuration
+
+next-introspect offers extensive configuration options to customize analysis behavior and output formatting.
+
+## Analysis Modes
+
+### Basic Mode
+
+Fastest analysis with essential route information.
+
+```bash
+next-introspect introspect . --mode basic
+```
+
+**Includes:**
+- Route paths and patterns
+- Basic route metadata
+- Router type detection
+
+### Detailed Mode
+
+Includes component analysis and extended metadata.
+
+```bash
+next-introspect introspect . --mode detailed
+```
+
+**Includes:**
+- All basic mode data
+- Component types (server/client)
+- Special files detection
+- Route groups and intercepting routes
+
+### Comprehensive Mode
+
+Complete analysis with all available metadata.
+
+```bash
+next-introspect introspect . --mode comprehensive
+```
+
+**Includes:**
+- All detailed mode data
+- Export analysis (metadata, generateStaticParams, etc.)
+- Data fetching methods (getServerSideProps, getStaticProps)
+- API route method detection
+
+## Path Display Options
+
+### Path Styles
+
+#### Absolute Paths (Default)
+```bash
+next-introspect introspect . --path-style absolute
+```
+Shows full absolute paths to files.
+
+#### Relative to Project Root
+```bash
+next-introspect introspect . --path-style relative-to-project
+```
+Shows paths relative to the project root directory.
+
+#### Relative to App Directory
+```bash
+next-introspect introspect . --path-style relative-to-app
+```
+Shows paths relative to the `app/` directory (App Router).
+
+#### Relative to Pages Directory
+```bash
+next-introspect introspect . --path-style relative-to-pages
+```
+Shows paths relative to the `pages/` directory (Pages Router).
+
+#### Strip Prefix
+```bash
+next-introspect introspect . --path-style strip-prefix --strip-prefix "src/"
+```
+Removes specified prefix from paths.
+
+### Multiple Prefix Stripping
+
+```bash
+next-introspect introspect . --strip-prefixes "src/app/" "packages/"
+```
+
+## Package Information Display
+
+### Package Summary
+
+```bash
+next-introspect introspect . --package-summary
+```
+
+Shows only essential package.json information:
+- Name and version
+- Dependency counts
+- Framework detection
+
+### Include Scripts
+
+```bash
+next-introspect introspect . --package-summary --include-scripts
+```
+
+Includes the scripts section in the summary.
+
+### Include Dependencies
+
+```bash
+next-introspect introspect . --package-summary --include-deps
+```
+
+Includes dependencies and devDependencies in the summary.
+
+## Output Formatting
+
+### Nested Structure
+
+```bash
+next-introspect introspect . --nested --format json
+```
+
+Organizes routes in a hierarchical structure instead of a flat array.
+
+### Include Empty Segments
+
+```bash
+next-introspect introspect . --nested --include-empty-segments --format json
+```
+
+Includes empty path segments in the nested structure.
+
+### Field Exclusion
+
+```bash
+next-introspect introspect . --exclude-fields "filePath,pattern,router"
+```
+
+Excludes specified fields from the output. Useful for reducing payload size or focusing on specific data.
+
+**Common exclusions:**
+- `filePath` - Remove file system paths
+- `pattern` - Remove route pattern information
+- `router` - Remove router type information
+- `dynamicSegments` - Remove dynamic segment details
+- `componentTypes` - Remove component type analysis
+
+### TypeScript Strip Prefixes
+
+```bash
+next-introspect introspect . --format typescript --strip-prefixes "/api/" "/_next/"
+```
+
+Removes specified prefixes from generated TypeScript route paths.
+
+## Metadata Integration
+
+### Metadata File
+
+```bash
+next-introspect introspect . --metadata metadata.json
+```
+
+Loads additional metadata from a JSON file to enhance route information.
+
+### Metadata File Format
+
+```json
+{
+  "/": {
+    "title": "Homepage",
+    "description": "Welcome to our website",
+    "category": "main"
+  },
+  "/blog/[slug]": {
+    "title": "Blog Post",
+    "description": "Read our latest blog posts",
+    "category": "content",
+    "authRequired": false
+  },
+  "/api/users": {
+    "title": "Users API",
+    "description": "User management endpoints",
+    "methods": ["GET", "POST", "PUT"],
+    "authRequired": true
+  }
+}
+```
+
+### TOML Support
+
+next-introspect also supports TOML format for metadata (basic support):
+
+```toml
+["/"]
+title = "Homepage"
+description = "Welcome to our website"
+
+["/blog/[slug]"]
+title = "Blog Post"
+description = "Read our latest blog posts"
+```
+
+## Watch Mode Configuration
+
+### Basic Watch
+
+```bash
+next-introspect introspect . --watch
+```
+
+### Watch with Custom Output
+
+```bash
+next-introspect introspect . --watch --format typescript --output routes.ts
+```
+
+### Quiet Watch
+
+```bash
+next-introspect introspect . --watch --quiet --output routes.json
+```
+
+### Watched File Types
+
+Watch mode monitors these file extensions:
+- `.js`, `.jsx`, `.ts`, `.tsx` - Route components and API handlers
+- `.json` - Package.json and configuration files
+- Configuration files - `next.config.*`, `tsconfig.json`
+
+### Ignored Directories
+
+Automatically ignores:
+- `node_modules/` - Dependencies
+- `.next/` - Build output
+- `.git/` - Version control
+- `dist/` - Distribution files
+- `build/` - Build artifacts
+
+## Programmatic Configuration
+
+### TypeScript Configuration
+
+```typescript
+import { NextIntrospect } from 'next-introspect';
+
+const introspect = new NextIntrospect('/path/to/project', {
+  // Analysis mode
+  mode: 'comprehensive',
+
+  // Path display configuration
+  pathDisplay: {
+    style: 'relative-to-project',
+    stripPrefix: 'src/',
+    showFilePaths: true
+  },
+
+  // Package display options
+  packageDisplay: {
+    includeFullDetails: false,
+    includeScripts: true,
+    includeDependencies: false
+  },
+
+  // Output formatting
+  outputFormat: {
+    nested: false,
+    includeEmptySegments: false,
+    excludeFields: ['filePath'],
+    stripPrefixes: ['/api/', '/_next/']
+  },
+
+  // Metadata integration
+  metadata: {
+    file: './metadata.json'
+  }
+});
+```
+
+### Configuration Types
+
+```typescript
+interface IntrospectionOptions {
+  mode?: 'basic' | 'detailed' | 'comprehensive';
+  maxDepth?: number;
+  followSymlinks?: boolean;
+
+  pathDisplay?: {
+    style?: 'absolute' | 'relative-to-project' | 'relative-to-app' | 'relative-to-pages' | 'strip-prefix';
+    stripPrefix?: string;
+    showFilePaths?: boolean;
+  };
+
+  packageDisplay?: {
+    includeFullDetails?: boolean;
+    includeScripts?: boolean;
+    includeDependencies?: boolean;
+  };
+
+  outputFormat?: {
+    nested?: boolean;
+    includeEmptySegments?: boolean;
+    excludeFields?: string[];
+    stripPrefixes?: string[];
+  };
+
+  metadata?: {
+    file?: string;
+    entries?: Record<string, RouteMetadata>;
+  };
+}
+```
+
+## Environment-Specific Configuration
+
+### Development Configuration
+
+```typescript
+const devConfig: IntrospectionOptions = {
+  mode: 'comprehensive',
+  pathDisplay: {
+    style: 'relative-to-project',
+    showFilePaths: true
+  },
+  outputFormat: {
+    excludeFields: []
+  }
+};
+```
+
+### Production Configuration
+
+```typescript
+const prodConfig: IntrospectionOptions = {
+  mode: 'basic',
+  pathDisplay: {
+    style: 'strip-prefix',
+    stripPrefix: '/app/',
+    showFilePaths: false
+  },
+  outputFormat: {
+    excludeFields: ['filePath', 'componentTypes']
+  }
+};
+```
+
+### CI/CD Configuration
+
+```typescript
+const ciConfig: IntrospectionOptions = {
+  mode: 'detailed',
+  outputFormat: {
+    nested: true,
+    excludeFields: ['filePath']
+  }
+};
+```
+
+## Configuration File Support
+
+### next-introspect.config.js
+
+```javascript
+module.exports = {
+  mode: 'comprehensive',
+  pathDisplay: {
+    style: 'relative-to-project',
+    showFilePaths: true
+  },
+  outputFormat: {
+    nested: false,
+    excludeFields: ['filePath']
+  },
+  metadata: {
+    file: './metadata.json'
+  }
+};
+```
+
+### next-introspect.config.ts
+
+```typescript
+import type { IntrospectionOptions } from 'next-introspect';
+
+const config: IntrospectionOptions = {
+  mode: 'comprehensive',
+  pathDisplay: {
+    style: 'relative-to-project',
+    showFilePaths: true
+  },
+  outputFormat: {
+    excludeFields: ['filePath']
+  }
+};
+
+export default config;
+```
+
+## Performance Tuning
+
+### Fast Analysis
+
+```bash
+next-introspect introspect . --mode basic --quiet
+```
+
+### Memory Optimization
+
+```bash
+next-introspect introspect . --exclude-fields "componentTypes,exports,dataFetching"
+```
+
+### Large Project Handling
+
+```bash
+next-introspect introspect . --mode basic --exclude-fields "filePath,dynamicSegments"
+```
+
+## Validation and Error Handling
+
+### Configuration Validation
+
+next-introspect validates configuration options and provides helpful error messages:
+
+```
+Error: Invalid mode 'fast'. Valid modes: basic, detailed, comprehensive
+Error: Invalid path style 'relative'. Valid styles: absolute, relative-to-project, relative-to-app, relative-to-pages, strip-prefix
+```
+
+### Graceful Degradation
+
+If optional configuration files are missing, next-introspect continues with defaults:
+
+```bash
+# This works even if metadata.json doesn't exist
+next-introspect introspect . --metadata metadata.json
+```
+
+## Best Practices
+
+### Development
+- Use `--mode comprehensive` for full analysis during development
+- Use `--path-style relative-to-project` for readable paths
+- Include `--show-file-paths` for debugging
+
+### Production
+- Use `--mode basic` for faster builds
+- Use `--exclude-fields` to reduce output size
+- Use `--strip-prefix` to normalize paths
+
+### CI/CD
+- Use `--quiet` to reduce log noise
+- Use `--format json` for machine-readable output
+- Use `--output` to save results for later processing
+
+### Documentation
+- Use `--format markdown` for human-readable docs
+- Use `--metadata` to add descriptions and titles
+- Use `--nested` for hierarchical route visualization

@@ -1,0 +1,611 @@
+---
+title: Examples & Tutorials
+description: Practical examples and tutorials for using next-introspect in different scenarios
+---
+
+# Examples & Tutorials
+
+This section provides practical examples and tutorials for using next-introspect in various scenarios.
+
+## Quick Start Examples
+
+### Basic Route Analysis
+
+```bash
+# Analyze your current project
+next-introspect introspect .
+
+# Analyze a specific project
+next-introspect introspect /path/to/my-nextjs-app
+
+# Save results to a file
+next-introspect introspect . --output routes.json
+```
+
+### Generate Documentation
+
+```bash
+# Create Markdown documentation
+next-introspect introspect . --format markdown --output ROUTES.md
+
+# Include metadata for better descriptions
+next-introspect introspect . --format markdown --metadata metadata.json --output ROUTES.md
+```
+
+### Type-Safe Route Generation
+
+```bash
+# Generate TypeScript route helpers
+next-introspect introspect . --format typescript --output routes.ts
+```
+
+Then use in your code:
+
+```typescript
+import { routes } from './routes';
+
+// Type-safe route generation
+const homeUrl = routes.$;
+const blogPostUrl = routes.blog.$slug({ slug: 'my-article' });
+const apiUrl = routes.api.users.$id({ id: '123' });
+```
+
+## Real-World Use Cases
+
+### Development Workflow Integration
+
+#### Automatic Route Generation During Development
+
+```bash
+# Watch mode for continuous route generation
+next-introspect introspect . --watch --format typescript --output src/routes.ts
+```
+
+This keeps your route definitions up-to-date as you add new pages and API routes.
+
+#### Build-Time Route Validation
+
+Add to your `package.json`:
+
+```json
+{
+  "scripts": {
+    "build": "next-introspect introspect . --mode basic --quiet && next build",
+    "dev": "next-introspect introspect . --watch --format typescript --output routes.ts & next dev"
+  }
+}
+```
+
+### Documentation Generation
+
+#### API Documentation
+
+```bash
+# Generate API route documentation
+next-introspect introspect . --mode comprehensive --format markdown --output API-ROUTES.md
+```
+
+#### Route Inventory for Large Applications
+
+```bash
+# Comprehensive route analysis for enterprise apps
+next-introspect introspect . \
+  --mode comprehensive \
+  --format json \
+  --nested \
+  --include-empty-segments \
+  --output route-inventory.json
+```
+
+### CI/CD Integration
+
+#### Route Change Detection
+
+```yaml
+# .github/workflows/route-check.yml
+name: Route Analysis
+on:
+  pull_request:
+    paths:
+      - 'app/**'
+      - 'pages/**'
+
+jobs:
+  analyze-routes:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: oven-sh/setup-bun@v1
+      - name: Install next-introspect
+        run: bun add -g next-introspect
+      - name: Analyze routes
+        run: next-introspect introspect . --format json --output routes.json
+      - name: Upload route analysis
+        uses: actions/upload-artifact@v3
+        with:
+          name: route-analysis
+          path: routes.json
+```
+
+#### Documentation Deployment
+
+```yaml
+# Deploy route documentation to GitHub Pages
+name: Deploy Route Docs
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: oven-sh/setup-bun@v1
+      - name: Generate documentation
+        run: |
+          bun add -g next-introspect
+          next-introspect introspect . --format markdown --metadata docs-metadata.json --output docs/ROUTES.md
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs
+```
+
+## Advanced Examples
+
+### Custom Route Metadata
+
+Create a `metadata.json` file:
+
+```json
+{
+  "/": {
+    "title": "Homepage",
+    "description": "Main landing page",
+    "category": "public",
+    "authRequired": false
+  },
+  "/dashboard": {
+    "title": "Dashboard",
+    "description": "User dashboard with analytics",
+    "category": "authenticated",
+    "authRequired": true,
+    "roles": ["user", "admin"]
+  },
+  "/api/users": {
+    "title": "Users API",
+    "description": "CRUD operations for user management",
+    "category": "api",
+    "methods": ["GET", "POST", "PUT", "DELETE"],
+    "authRequired": true
+  },
+  "/blog/[slug]": {
+    "title": "Blog Post",
+    "description": "Individual blog post pages",
+    "category": "content",
+    "dynamic": true,
+    "params": {
+      "slug": {
+        "type": "string",
+        "description": "URL-friendly post identifier"
+      }
+    }
+  }
+}
+```
+
+Use with analysis:
+
+```bash
+next-introspect introspect . --metadata metadata.json --format markdown --output ROUTES.md
+```
+
+### Multi-Environment Route Analysis
+
+#### Development Environment
+
+```bash
+next-introspect introspect . \
+  --mode comprehensive \
+  --path-style relative-to-project \
+  --show-file-paths \
+  --format json \
+  --output routes-dev.json
+```
+
+#### Production Environment
+
+```bash
+next-introspect introspect . \
+  --mode basic \
+  --path-style strip-prefix \
+  --strip-prefix "/app/" \
+  --exclude-fields "filePath,componentTypes" \
+  --format json \
+  --output routes-prod.json
+```
+
+### API Route Analysis
+
+Focus specifically on API routes:
+
+```bash
+# Get all API routes
+next-introspect introspect . --format json | jq '.routes[] | select(.path | startswith("/api/"))'
+```
+
+Or programmatically:
+
+```typescript
+import { NextIntrospect } from 'next-introspect';
+
+const introspect = new NextIntrospect('./');
+await introspect.analyze();
+
+const apiRoutes = introspect.getRoutes().filter(route =>
+  route.path.startsWith('/api/')
+);
+
+console.log('API Routes:', apiRoutes);
+```
+
+### Dynamic Route Analysis
+
+Find all dynamic routes:
+
+```typescript
+const dynamicRoutes = introspect.getDynamicRoutes();
+
+dynamicRoutes.forEach(route => {
+  console.log(`Dynamic route: ${route.path}`);
+  console.log(`Parameters: ${route.dynamicSegments?.join(', ')}`);
+  console.log(`Pattern: ${route.pattern}`);
+});
+```
+
+### Route Change Detection
+
+Compare route structures between commits:
+
+```bash
+# Get current routes
+next-introspect introspect . --format json --output routes-current.json
+
+# Get previous routes (from git)
+git show HEAD~1:routes.json > routes-previous.json
+
+# Compare
+diff routes-previous.json routes-current.json || echo "Routes have changed"
+```
+
+## Framework-Specific Examples
+
+### App Router Examples
+
+#### Route Groups Analysis
+
+```typescript
+const introspect = new NextIntrospect('./');
+await introspect.analyze();
+
+const routeGroups = introspect.getRoutes().filter(route =>
+  route.appRouter?.isRouteGroup
+);
+
+console.log('Route Groups:', routeGroups);
+```
+
+#### Intercepting Routes
+
+```typescript
+const interceptingRoutes = introspect.getRoutes().filter(route =>
+  route.appRouter?.isInterceptingRoute
+);
+
+interceptingRoutes.forEach(route => {
+  console.log(`Intercepting route: ${route.path}`);
+  console.log(`Intercepts: ${route.appRouter?.segment}`);
+});
+```
+
+#### Parallel Routes
+
+```typescript
+const parallelRoutes = introspect.getRoutes().filter(route =>
+  route.appRouter?.isParallelRoute
+);
+
+parallelRoutes.forEach(route => {
+  console.log(`Parallel route: ${route.path}`);
+  console.log(`Slot: ${route.appRouter?.segment}`);
+});
+```
+
+### Pages Router Examples
+
+#### API Routes Analysis
+
+```typescript
+const apiRoutes = introspect.getApiRoutes();
+
+apiRoutes.forEach(route => {
+  console.log(`API Route: ${route.path}`);
+  console.log(`File: ${route.filePath}`);
+  console.log(`Is API: ${route.pagesRouter?.isApiRoute}`);
+});
+```
+
+#### Special Pages
+
+```typescript
+const specialPages = introspect.getSpecialPages();
+
+specialPages.forEach(route => {
+  console.log(`Special page: ${route.path}`);
+  console.log(`Type: ${route.pagesRouter?.specialPageType}`);
+  console.log(`File: ${route.filePath}`);
+});
+```
+
+#### Data Fetching Methods
+
+```typescript
+const routesWithDataFetching = introspect.getRoutes().filter(route =>
+  route.pagesRouter?.dataFetching
+);
+
+routesWithDataFetching.forEach(route => {
+  console.log(`Route: ${route.path}`);
+  console.log(`Data fetching:`, route.pagesRouter?.dataFetching);
+});
+```
+
+## Integration Examples
+
+### With Build Tools
+
+#### Vite Plugin
+
+```typescript
+// vite-plugin-routes.ts
+import { NextIntrospect } from 'next-introspect';
+import type { Plugin } from 'vite';
+
+export function routesPlugin(): Plugin {
+  return {
+    name: 'routes',
+    buildStart() {
+      // Generate routes at build start
+      const introspect = new NextIntrospect('./src', {
+        mode: 'basic',
+        outputFormat: { excludeFields: ['filePath'] }
+      });
+
+      introspect.analyze().then(() => {
+        return introspect.exportToFile('./src/routes.ts', 'typescript');
+      });
+    }
+  };
+}
+```
+
+#### Webpack Plugin
+
+```javascript
+// NextIntrospectWebpackPlugin.js
+const { NextIntrospect } = require('next-introspect');
+
+class NextIntrospectWebpackPlugin {
+  constructor(options = {}) {
+    this.options = options;
+  }
+
+  apply(compiler) {
+    compiler.hooks.beforeCompile.tapPromise('NextIntrospectPlugin', async () => {
+      const introspect = new NextIntrospect(this.options.projectPath || './', {
+        mode: 'basic',
+        ...this.options
+      });
+
+      await introspect.analyze();
+      await introspect.exportToFile(this.options.output || './routes.json', 'json');
+    });
+  }
+}
+
+module.exports = NextIntrospectWebpackPlugin;
+```
+
+### With Testing Frameworks
+
+#### Route Testing Helper
+
+```typescript
+// test/helpers/routes.ts
+import { NextIntrospect } from 'next-introspect';
+
+let routesCache: any = null;
+
+export async function getRoutes() {
+  if (!routesCache) {
+    const introspect = new NextIntrospect('./');
+    await introspect.analyze();
+    routesCache = introspect.getResult();
+  }
+  return routesCache;
+}
+
+export async function getRoute(path: string) {
+  const result = await getRoutes();
+  return result.routes.find((route: any) => route.path === path);
+}
+```
+
+#### Route Existence Tests
+
+```typescript
+// tests/routes.test.ts
+import { getRoutes, getRoute } from '../test/helpers/routes';
+
+describe('Routes', () => {
+  let routes: any;
+
+  beforeAll(async () => {
+    routes = await getRoutes();
+  });
+
+  test('should have homepage', async () => {
+    const homeRoute = await getRoute('/');
+    expect(homeRoute).toBeDefined();
+    expect(homeRoute.router).toBe('app');
+  });
+
+  test('should have blog routes', async () => {
+    const blogRoutes = routes.routes.filter((route: any) =>
+      route.path.startsWith('/blog')
+    );
+    expect(blogRoutes.length).toBeGreaterThan(0);
+  });
+
+  test('should have API routes', async () => {
+    const apiRoutes = routes.routes.filter((route: any) =>
+      route.path.startsWith('/api')
+    );
+    expect(apiRoutes.length).toBeGreaterThan(0);
+  });
+});
+```
+
+### With Storybook
+
+#### Route-Based Story Organization
+
+```typescript
+// .storybook/routes.ts
+import { NextIntrospect } from 'next-introspect';
+
+export async function generateStories() {
+  const introspect = new NextIntrospect('../app'); // Adjust path
+  await introspect.analyze();
+  const routes = introspect.getRoutes();
+
+  const stories = routes.map(route => ({
+    title: `Routes/${route.path}`,
+    component: () => <div>Route: {route.path}</div>,
+    parameters: {
+      route: route.path,
+      filePath: route.filePath
+    }
+  }));
+
+  return stories;
+}
+```
+
+## Migration Examples
+
+### From Pages Router to App Router
+
+Track the migration progress:
+
+```bash
+# Analyze current state
+next-introspect introspect . --format json --output migration-status.json
+
+# Generate migration report
+node scripts/migration-report.js migration-status.json
+```
+
+```typescript
+// scripts/migration-report.js
+const fs = require('fs');
+
+const result = JSON.parse(fs.readFileSync(process.argv[2], 'utf-8'));
+
+const pagesRoutes = result.routes.filter(r => r.router === 'pages');
+const appRoutes = result.routes.filter(r => r.router === 'app');
+
+console.log('Migration Status Report');
+console.log('=======================');
+console.log(`Pages Router routes: ${pagesRoutes.length}`);
+console.log(`App Router routes: ${appRoutes.length}`);
+console.log(`Migration progress: ${((appRoutes.length / (pagesRoutes.length + appRoutes.length)) * 100).toFixed(1)}%`);
+
+// Identify routes that need migration
+const apiRoutes = pagesRoutes.filter(r => r.pagesRouter?.isApiRoute);
+console.log(`API routes to migrate: ${apiRoutes.length}`);
+
+const dynamicRoutes = pagesRoutes.filter(r => r.pattern !== 'static');
+console.log(`Dynamic routes to migrate: ${dynamicRoutes.length}`);
+```
+
+### Route Cleanup
+
+Find unused or problematic routes:
+
+```typescript
+const introspect = new NextIntrospect('./');
+await introspect.analyze();
+const routes = introspect.getRoutes();
+
+// Find routes without corresponding files
+const missingFiles = routes.filter(route => {
+  try {
+    require('fs').accessSync(route.filePath);
+    return false;
+  } catch {
+    return true;
+  }
+});
+
+console.log('Routes with missing files:', missingFiles);
+
+// Find API routes without proper HTTP methods
+const apiRoutes = introspect.getApiRoutes();
+const incompleteApiRoutes = apiRoutes.filter(route => {
+  // Check if route file exports proper HTTP method handlers
+  // Implementation depends on your analysis needs
+});
+
+console.log('Incomplete API routes:', incompleteApiRoutes);
+```
+
+## Performance Examples
+
+### Large Project Optimization
+
+```bash
+# Fast analysis for large projects
+next-introspect introspect . \
+  --mode basic \
+  --exclude-fields "componentTypes,exports,dataFetching" \
+  --quiet \
+  --output routes-fast.json
+```
+
+### Incremental Analysis
+
+```typescript
+class IncrementalAnalyzer {
+  private lastAnalysis: number = 0;
+  private cache: Map<string, any> = new Map();
+
+  async analyzeIfNeeded(projectPath: string) {
+    const stats = await fs.stat(projectPath);
+    const mtime = stats.mtime.getTime();
+
+    if (mtime > this.lastAnalysis) {
+      const introspect = new NextIntrospect(projectPath, { mode: 'basic' });
+      await introspect.analyze();
+      this.cache.set(projectPath, introspect.getResult());
+      this.lastAnalysis = mtime;
+    }
+
+    return this.cache.get(projectPath);
+  }
+}
+```
+
+These examples demonstrate how to integrate next-introspect into various development workflows, from simple CLI usage to complex programmatic integrations.

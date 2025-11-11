@@ -771,7 +771,7 @@ export default function HomePage() {
                   businesses.
                 </p>
                 <a
-                  href="https://webdesign29.net/"
+                  href="https://www.webdesign29.net/"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center justify-center px-6 py-3 text-sm font-semibold text-white bg-black hover:bg-gray-800 transition-colors"

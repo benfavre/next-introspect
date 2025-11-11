@@ -6,6 +6,8 @@ const withMDX = createMDX();
 const config = {
   output: 'export',
   reactStrictMode: true,
+  trailingSlash: true,
+  assetPrefix: process.env.GITHUB_PAGES ? '/next-introspect/' : '',
   // img.shields.io
   images: {
     remotePatterns: [

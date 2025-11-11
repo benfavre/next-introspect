@@ -48,6 +48,11 @@ jobs:
         run: |
           export GITHUB_PAGES=true
           bun run build
+        env:
+          GITHUB_PAGES: true
+
+      - name: Create .nojekyll file
+        run: touch out/.nojekyll
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

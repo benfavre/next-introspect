@@ -7,6 +7,7 @@ const config = {
   output: 'export',
   reactStrictMode: true,
   trailingSlash: true,
+  basePath: process.env.GITHUB_PAGES ? '/next-introspect' : '',
   assetPrefix: process.env.GITHUB_PAGES ? '/next-introspect/' : '',
   // img.shields.io
   images: {

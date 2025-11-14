@@ -113,8 +113,7 @@ export abstract class BaseAdapter implements FrameworkAdapter {
 
       return packageData.dependencies?.[packageName] ||
              packageData.devDependencies?.[packageName];
-    // eslint-disable-next-line no-unused-vars
-    } catch (_error) {
+    } catch {
       return undefined;
     }
   }
@@ -128,8 +127,7 @@ export abstract class BaseAdapter implements FrameworkAdapter {
     try {
       const stats = await fs.stat(dirPath);
       return stats.isDirectory();
-    // eslint-disable-next-line no-unused-vars
-    } catch (_error) {
+    } catch {
       return false;
     }
   }
@@ -143,8 +141,7 @@ export abstract class BaseAdapter implements FrameworkAdapter {
     try {
       const stats = await fs.stat(filePath);
       return stats.isFile();
-    // eslint-disable-next-line no-unused-vars
-    } catch (_error) {
+    } catch {
       return false;
     }
   }
@@ -165,8 +162,7 @@ export abstract class BaseAdapter implements FrameworkAdapter {
       const packageJsonPath = path.join(projectPath, 'package.json');
       const packageJson = await fs.readFile(packageJsonPath, 'utf-8');
       packageInfo = JSON.parse(packageJson);
-    // eslint-disable-next-line no-unused-vars
-    } catch (_error) {
+    } catch {
       // Package.json is optional
     }
 

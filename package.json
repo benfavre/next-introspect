@@ -1,6 +1,6 @@
 {
     "name": "next-introspect",
-    "version": "0.3.16",
+    "version": "0.3.17",
     "description": "Project introspection tool that analyzes routing structures and generates detailed metadata, supports Next.js for now",
     "type": "module",
     "main": "./dist/index.js",
@@ -15,25 +15,30 @@
             "import": "./dist/index.js"
         }
     },
-    "scripts": {
-        "build": "tsup src/index.ts src/cli.ts --format esm --dts",
-        "dev": "tsup src/index.ts src/cli.ts --format esm --dts --watch",
-        "type-check": "tsc --noEmit",
-        "test": "vitest run",
-        "test:watch": "vitest",
-        "test:coverage": "vitest run --coverage"
-    },
+"scripts": {
+    "build": "tsup src/index.ts src/cli.ts --format esm --dts",
+    "dev": "tsup src/index.ts src/cli.ts --format esm --dts --watch",
+    "type-check": "tsc --noEmit",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
+},
     "dependencies": {
         "commander": "^11.1.0",
         "chalk": "^5.3.0"
     },
-    "devDependencies": {
-        "@types/node": "^20.10.0",
-        "@vitest/coverage-v8": "^1.0.0",
-        "tsup": "^8.0.1",
-        "typescript": "^5.9.0",
-        "vitest": "^1.0.0"
-    },
+"devDependencies": {
+    "@eslint/js": "^9.9.0",
+    "@types/node": "^20.10.0",
+    "@vitest/coverage-v8": "^1.0.0",
+    "eslint": "^9.9.0",
+    "tsup": "^8.0.1",
+    "typescript": "^5.9.0",
+    "typescript-eslint": "^8.0.0",
+    "vitest": "^1.0.0"
+},
     "keywords": [
         "nextjs",
         "introspection",

@@ -422,8 +422,7 @@ export class NextIntrospect {
       const fs = await import("fs/promises");
       await fs.access(this.projectPath);
       return await isNextJsProject(this.projectPath);
-      // eslint-disable-next-line no-unused-vars
-    } catch (_error) {
+    } catch {
       return false;
     }
   }

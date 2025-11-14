@@ -351,7 +351,7 @@ export class NextJsAdapter extends BaseAdapter {
   private convertFilePathToRoute(relativePath: string): string {
     // The relativePath is already relative to the app directory
     // Remove special file names and their extensions
-    let routePath = relativePath.replace(
+    const routePath = relativePath.replace(
       /\/(page|route|layout|loading|error|not-found|template|default)(\..*)?$/,
       "",
     );

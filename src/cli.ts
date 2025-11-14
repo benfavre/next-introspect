@@ -3,8 +3,95 @@
 import { Command } from "commander";
 import chalk from "chalk";
 import path from "path";
+import fs from "fs";
 import { NextIntrospect } from "./NextIntrospect.js";
 import type { OutputFormat, OutputMode } from "./types.js";
+
+/**
+ * CLI Options interface for type safety
+ */
+interface CLIOptions {
+  format: OutputFormat;
+  mode: OutputMode;
+  output?: string;
+  indent?: number;
+  quiet: boolean;
+  pathStyle: "absolute" | "relative-to-project" | "relative-to-app" | "relative-to-pages" | "strip-prefix";
+  stripPrefix?: string;
+  stripPrefixes: string[];
+  showFilePaths: boolean;
+  packageSummary: boolean;
+  includeScripts: boolean;
+  includeDeps: boolean;
+  nested: boolean;
+  includeEmptySegments: boolean;
+  excludeFields?: string;
+  metadata?: string;
+  watch: boolean;
+}
+
+/**
+ * Validate and sanitize file path
+ */
+function validateFilePath(filePath: string, description: string): string {
+  if (!filePath || typeof filePath !== 'string') {
+    throw new Error(`Invalid ${description}: must be a non-empty string`);
+  }
+
+  // Prevent path traversal attacks
+  const resolvedPath = path.resolve(filePath);
+  const normalizedPath = path.normalize(resolvedPath);
+
+  if (!normalizedPath.startsWith(resolvedPath)) {
+    throw new Error(`Invalid ${description}: path traversal detected`);
+  }
+
+  return resolvedPath;
+}
+
+/**
+ * Validate project directory exists and is accessible
+ */
+function validateProjectDirectory(projectPath: string): void {
+  try {
+    const stats = fs.statSync(projectPath);
+    if (!stats.isDirectory()) {
+      throw new Error(`Path is not a directory: ${projectPath}`);
+    }
+
+    // Try to access the directory
+    fs.accessSync(projectPath, fs.constants.R_OK);
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(`Cannot access project directory: ${error.message}`);
+    }
+    throw new Error(`Cannot access project directory: ${projectPath}`);
+  }
+}
+
+/**
+ * Validate output file path (create parent directories if needed)
+ */
+function validateOutputPath(outputPath: string): string {
+  const resolvedPath = validateFilePath(outputPath, 'output path');
+
+  // Check if parent directory exists and is writable
+  const parentDir = path.dirname(resolvedPath);
+  try {
+    const stats = fs.statSync(parentDir);
+    if (!stats.isDirectory()) {
+      throw new Error(`Parent path is not a directory: ${parentDir}`);
+    }
+    fs.accessSync(parentDir, fs.constants.W_OK);
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(`Cannot write to output directory: ${error.message}`);
+    }
+    throw new Error(`Cannot write to output directory: ${parentDir}`);
+  }
+
+  return resolvedPath;
+}
 
 const program = new Command();
 
@@ -20,11 +107,15 @@ function collectPrefixes(value: string, previous: string[]): string[] {
  */
 async function runAnalysisOnce(
   projectPath: string,
-  options: any,
+  options: CLIOptions,
   startTime: number,
 ): Promise<void> {
   // Build configuration options
-  const pathDisplay: any = {
+  const pathDisplay: {
+    style: CLIOptions['pathStyle'];
+    showFilePaths: boolean;
+    stripPrefix?: string;
+  } = {
     style: options.pathStyle,
     showFilePaths: options.showFilePaths || false,
   };
@@ -34,7 +125,11 @@ async function runAnalysisOnce(
   }
 
   // Build package display options
-  const packageDisplay: any = {};
+  const packageDisplay: {
+    includeFullDetails?: boolean;
+    includeScripts?: boolean;
+    includeDependencies?: boolean;
+  } = {};
   if (options.packageSummary) {
     packageDisplay.includeFullDetails = false;
     packageDisplay.includeScripts = options.includeScripts || false;
@@ -42,7 +137,12 @@ async function runAnalysisOnce(
   }
 
   // Build output format options
-  const outputFormat: any = {};
+  const outputFormat: {
+    nested?: boolean;
+    includeEmptySegments?: boolean;
+    excludeFields?: string[];
+    stripPrefixes?: string[];
+  } = {};
   if (options.nested) {
     outputFormat.nested = true;
     outputFormat.includeEmptySegments = options.includeEmptySegments || false;
@@ -64,7 +164,9 @@ async function runAnalysisOnce(
   }
 
   // Build metadata options
-  const metadata: any = {};
+  const metadata: {
+    file?: string;
+  } = {};
   if (options.metadata) {
     metadata.file = options.metadata;
   }
@@ -148,7 +250,7 @@ async function runAnalysisOnce(
  */
 async function runInWatchMode(
   projectPath: string,
-  options: any,
+  options: CLIOptions,
 ): Promise<void> {
   if (!options.quiet) {
     console.log(chalk.blue(`👀 Starting watch mode for: ${projectPath}`));
@@ -164,88 +266,132 @@ async function runInWatchMode(
   const fs = await import("fs");
   const watchPath = path.resolve(projectPath);
 
-  let timeoutId: NodeJS.Timeout | null = null;
-  let isRunning = false;
-
-  const watcher = fs.watch(
-    watchPath,
-    { recursive: true },
-    (eventType, filename) => {
-      // Ignore events without filenames or non-route files
-      if (!filename) return;
-
-      const filePath = path.join(watchPath, filename);
-
-      // Skip files we don't care about
-      if (
-        filePath.includes("node_modules") ||
-        filePath.includes(".next") ||
-        filePath.includes(".git") ||
-        !/\.(js|jsx|ts|tsx|json)$/.test(filePath)
-      ) {
-        return;
-      }
-
-      // Debounce changes
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
-
-      timeoutId = setTimeout(async () => {
-        if (isRunning) return; // Prevent overlapping runs
-        isRunning = true;
-
-        try {
-          if (!options.quiet) {
-            console.log("");
-            console.log(chalk.yellow(`📝 File changed: ${filename}`));
-            console.log(chalk.blue("🔄 Re-running analysis..."));
-          }
-
-          const analysisStartTime = Date.now();
-          await runAnalysisOnce(
-            projectPath,
-            { ...options, quiet: true },
-            analysisStartTime,
-          );
-
-          if (!options.quiet) {
-            console.log(chalk.green("✅ Analysis updated"));
-          }
-        } catch (error) {
-          console.error(chalk.red("❌ Watch mode error:"), error);
-        } finally {
-          isRunning = false;
-        }
-      }, 300); // 300ms debounce
-    },
-  );
-
-  // Handle process termination
-  const cleanup = () => {
-    if (timeoutId) {
-      clearTimeout(timeoutId);
-    }
-    watcher.close();
-    if (!options.quiet) {
-      console.log("");
-      console.log(chalk.gray("👋 Watch mode stopped"));
-    }
-    process.exit(0);
+  // Watch mode state for proper cleanup
+  const watchState = {
+    timeoutId: null as NodeJS.Timeout | null,
+    watcher: null as fs.FSWatcher | null,
+    isRunning: false,
+    isShuttingDown: false,
   };
 
-  process.on("SIGINT", cleanup);
-  process.on("SIGTERM", cleanup);
+  try {
+    watchState.watcher = fs.watch(
+      watchPath,
+      { recursive: true },
+      (eventType, filename) => {
+        // Skip if shutting down
+        if (watchState.isShuttingDown) return;
 
-  // Keep the process running
-  return new Promise(() => {}); // Never resolves, runs until interrupted
+        // Ignore events without filenames or non-route files
+        if (!filename) return;
+
+        const filePath = path.join(watchPath, filename);
+
+        // Skip files we don't care about
+        if (
+          filePath.includes("node_modules") ||
+          filePath.includes(".next") ||
+          filePath.includes(".git") ||
+          filePath.includes(".turbo") ||
+          !/\.(js|jsx|ts|tsx|json)$/.test(filePath)
+        ) {
+          return;
+        }
+
+        // Debounce changes
+        if (watchState.timeoutId) {
+          clearTimeout(watchState.timeoutId);
+        }
+
+        watchState.timeoutId = setTimeout(async () => {
+          if (watchState.isRunning || watchState.isShuttingDown) return; // Prevent overlapping runs
+          watchState.isRunning = true;
+
+          try {
+            if (!options.quiet) {
+              console.log("");
+              console.log(chalk.yellow(`📝 File changed: ${filename}`));
+              console.log(chalk.blue("🔄 Re-running analysis..."));
+            }
+
+            const analysisStartTime = Date.now();
+            await runAnalysisOnce(
+              projectPath,
+              { ...options, quiet: true },
+              analysisStartTime,
+            );
+
+            if (!options.quiet) {
+              console.log(chalk.green("✅ Analysis updated"));
+            }
+          } catch (error) {
+            console.error(chalk.red("❌ Watch mode error:"), error);
+          } finally {
+            watchState.isRunning = false;
+          }
+        }, 300); // 300ms debounce
+      },
+    );
+
+    // Handle process termination with proper cleanup
+    const cleanup = () => {
+      if (watchState.isShuttingDown) return;
+      watchState.isShuttingDown = true;
+
+      if (watchState.timeoutId) {
+        clearTimeout(watchState.timeoutId);
+        watchState.timeoutId = null;
+      }
+
+      if (watchState.watcher) {
+        watchState.watcher.close();
+        watchState.watcher = null;
+      }
+
+      if (!options.quiet) {
+        console.log("");
+        console.log(chalk.gray("👋 Watch mode stopped"));
+      }
+
+      // Exit gracefully
+      process.exit(0);
+    };
+
+    // Handle multiple termination signals
+    process.on("SIGINT", cleanup);
+    process.on("SIGTERM", cleanup);
+    process.on("SIGHUP", cleanup); // Handle terminal close
+
+    // Handle uncaught exceptions in watch mode
+    process.on("uncaughtException", (error) => {
+      console.error(chalk.red("❌ Uncaught exception in watch mode:"), error);
+      cleanup();
+    });
+
+    process.on("unhandledRejection", (reason, _promise) => {
+      console.error(chalk.red("❌ Unhandled rejection in watch mode:"), reason);
+      cleanup();
+    });
+
+    // Keep the process running
+    return new Promise(() => {}); // Never resolves, runs until interrupted
+  } catch (error) {
+    // Cleanup on setup failure
+    if (watchState.watcher) {
+      watchState.watcher.close();
+    }
+    if (watchState.timeoutId) {
+      clearTimeout(watchState.timeoutId);
+    }
+    throw error;
+  }
 }
 
 // CLI Configuration
 program
   .name("next-introspect")
   .description("Next.js project introspection tool")
-  .version("0.1.0");
+  .version("0.3.17");
 
 // Main introspect command
 program
@@ -319,6 +465,23 @@ program
     const startTime = Date.now();
 
     try {
+      // Validate and sanitize project path
+      const validatedProjectPath = validateFilePath(projectPath, 'project path');
+      validateProjectDirectory(validatedProjectPath);
+
+      // Validate output path if provided
+      if (options.output) {
+        options.output = validateOutputPath(options.output);
+      }
+
+      // Validate metadata file if provided
+      if (options.metadata) {
+        options.metadata = validateFilePath(options.metadata, 'metadata file');
+        if (!fs.existsSync(options.metadata)) {
+          throw new Error(`Metadata file does not exist: ${options.metadata}`);
+        }
+      }
+
       // Validate format
       const validFormats: OutputFormat[] = [
         "object",
@@ -327,23 +490,13 @@ program
         "typescript",
       ];
       if (!validFormats.includes(options.format)) {
-        console.error(
-          chalk.red(
-            `Error: Invalid format '${options.format}'. Valid formats: ${validFormats.join(", ")}`,
-          ),
-        );
-        process.exit(1);
+        throw new Error(`Invalid format '${options.format}'. Valid formats: ${validFormats.join(", ")}`);
       }
 
       // Validate mode
       const validModes: OutputMode[] = ["basic", "detailed", "comprehensive"];
       if (!validModes.includes(options.mode)) {
-        console.error(
-          chalk.red(
-            `Error: Invalid mode '${options.mode}'. Valid modes: ${validModes.join(", ")}`,
-          ),
-        );
-        process.exit(1);
+        throw new Error(`Invalid mode '${options.mode}'. Valid modes: ${validModes.join(", ")}`);
       }
 
       // Validate path style
@@ -355,19 +508,19 @@ program
         "strip-prefix",
       ];
       if (!validPathStyles.includes(options.pathStyle)) {
-        console.error(
-          chalk.red(
-            `Error: Invalid path style '${options.pathStyle}'. Valid styles: ${validPathStyles.join(", ")}`,
-          ),
-        );
-        process.exit(1);
+        throw new Error(`Invalid path style '${options.pathStyle}'. Valid styles: ${validPathStyles.join(", ")}`);
+      }
+
+      // Validate indent if provided
+      if (options.indent !== undefined && (typeof options.indent !== 'number' || options.indent < 0)) {
+        throw new Error('Indent must be a non-negative number');
       }
 
       // Run analysis once or start watch mode
       if (options.watch) {
-        await runInWatchMode(projectPath, options);
+        await runInWatchMode(validatedProjectPath, options);
       } else {
-        await runAnalysisOnce(projectPath, options, startTime);
+        await runAnalysisOnce(validatedProjectPath, options, startTime);
       }
     } catch (error) {
       const errorMessage =
@@ -413,30 +566,45 @@ program
     const startTime = Date.now();
 
     try {
-      console.log(chalk.blue(`🔄 Merging ${jsonFile} with ${metadataFile}`));
+      // Validate input files
+      const validatedJsonFile = validateFilePath(jsonFile, 'JSON file');
+      const validatedMetadataFile = validateFilePath(metadataFile, 'metadata file');
+
+      if (!fs.existsSync(validatedJsonFile)) {
+        throw new Error(`JSON file does not exist: ${validatedJsonFile}`);
+      }
+
+      if (!fs.existsSync(validatedMetadataFile)) {
+        throw new Error(`Metadata file does not exist: ${validatedMetadataFile}`);
+      }
+
+      // Validate output path if provided
+      if (options.output) {
+        options.output = validateOutputPath(options.output);
+      }
+
+      // Validate indent if provided
+      if (options.indent !== undefined && (typeof options.indent !== 'number' || options.indent < 0)) {
+        throw new Error('Indent must be a non-negative number');
+      }
+
+      console.log(chalk.blue(`🔄 Merging ${validatedJsonFile} with ${validatedMetadataFile}`));
 
       // Load metadata file
-      const fs = await import("fs");
-      const metadataContent = fs.readFileSync(metadataFile, "utf-8");
+      const metadataContent = fs.readFileSync(validatedMetadataFile, "utf-8");
       let metadata: any;
 
-      if (metadataFile.endsWith(".json")) {
+      if (validatedMetadataFile.endsWith(".json")) {
         metadata = JSON.parse(metadataContent);
-      } else if (metadataFile.endsWith(".toml")) {
+      } else if (validatedMetadataFile.endsWith(".toml")) {
         // For now, just try to parse as JSON, TOML support can be added later
         try {
           metadata = JSON.parse(metadataContent);
         } catch {
-          console.error(
-            chalk.red("❌ TOML parsing not yet implemented. Use JSON format."),
-          );
-          process.exit(1);
+          throw new Error("TOML parsing not yet implemented. Use JSON format.");
         }
       } else {
-        console.error(
-          chalk.red("❌ Unsupported metadata file format. Use .json"),
-        );
-        process.exit(1);
+        throw new Error("Unsupported metadata file format. Use .json");
       }
 
       // Create introspector with exclude fields option
@@ -452,7 +620,7 @@ program
         outputFormat:
           Object.keys(outputFormat).length > 0 ? outputFormat : undefined,
       });
-      const mergedResult = await introspect.mergeWithJson(jsonFile, metadata);
+      const mergedResult = await introspect.mergeWithJson(validatedJsonFile, metadata);
 
       // Apply field filtering if specified
       let finalResult = mergedResult;

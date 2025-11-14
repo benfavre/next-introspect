@@ -102,8 +102,7 @@ export async function isNextJsProject(projectPath: string): Promise<boolean> {
     const hasPagesDir = existsSync(path.join(projectPath, 'pages'));
 
     return hasNextJs || hasConfigFile || hasAppDir || hasPagesDir;
-  // eslint-disable-next-line no-unused-vars
-  } catch (_error) {
+  } catch {
     return false;
   }
 }
@@ -166,8 +165,7 @@ export async function getPackageInfo(
     if (fullPackageInfo.packageManager) summary.packageManager = fullPackageInfo.packageManager;
 
     return summary;
-  // eslint-disable-next-line no-unused-vars
-  } catch (_error) {
+  } catch {
     return undefined;
   }
 }

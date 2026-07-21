@@ -5,7 +5,15 @@
             "ES2022"
         ],
         "module": "ESNext",
-        "moduleResolution": "Node",
+        // Was `Node` (= node10), which TS >= 5.9 reports as a deprecation
+        // ERROR and which kills the .d.ts emit. `ignoreDeprecations` cannot fix
+        // it portably: 5.9 rejects "6.0" (TS5103) while 6.x demands it, so the
+        // value that unbreaks one toolchain breaks the other — which is why a
+        // cold-cache `turbo build` failed on the amisferme box while infra
+        // replayed a cache hit. `Bundler` carries no deprecation on either, and
+        // is the right mode for a tsup/esbuild-bundled package: only the .d.ts
+        // emit uses tsc resolution, the ESM output never did.
+        "moduleResolution": "Bundler",
         "declaration": true,
         "declarationMap": true,
         "outDir": "./dist",
@@ -18,7 +26,6 @@
         "allowSyntheticDefaultImports": true,
         "isolatedModules": true,
         "noEmit": false,
-        "ignoreDeprecations": "6.0",
         "types": [
             "node"
         ]

@@ -14,6 +14,13 @@
         // is the right mode for a tsup/esbuild-bundled package: only the .d.ts
         // emit uses tsc resolution, the ESM output never did.
         "moduleResolution": "Bundler",
+        // tsup FORCES `baseUrl: compilerOptions.baseUrl || "."` into the dts
+        // build (see tsup/dist/rollup.js), so that deprecation cannot be avoided
+        // from here — only silenced. The accepted value is version-locked: TS 6
+        // takes "6.0" and rejects "5.0", 5.9 the reverse. The typescript
+        // devDependency is pinned to the same 6.x line the monorepo root uses,
+        // so this value is always the correct one.
+        "ignoreDeprecations": "6.0",
         "declaration": true,
         "declarationMap": true,
         "outDir": "./dist",
